@@ -1,0 +1,27 @@
+{
+  "name": "sprinthub-front-end",
+  "version": "1.0.0",
+  "description": "Repositorio para trabajo SprintHub (Front-end)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SprinHub-Team/SprintHub-Front-end.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SprinHub-Team/SprintHub-Front-end/issues"
+  },
+  "homepage": "https://github.com/SprinHub-Team/SprintHub-Front-end#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.9.1",
+    "nodemon": "^3.1.14"
+  }
+}
