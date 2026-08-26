@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../views/auth/Login';
 import Register from '../views/auth/Register';
+import GroupsDashboard from '../views/dashboard/GroupsDashboard';
 import { useAuthStore } from '../store/useAuthStore';
 
 // Un componente para proteger rutas
@@ -11,19 +12,6 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     return <Navigate to="/login" replace />;
   }
   return children;
-};
-
-// Vistas simuladas para el flujo
-const DashboardPlaceholder = () => {
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Bienvenido, {user?.name}</h1>
-      <button onClick={logout}>Cerrar Sesión</button>
-      <p>Aquí irá la vista de Grupos y Tableros.</p>
-    </div>
-  );
 };
 
 export const AppRoutes: React.FC = () => {
@@ -39,7 +27,7 @@ export const AppRoutes: React.FC = () => {
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <DashboardPlaceholder />
+            <GroupsDashboard />
           </ProtectedRoute>
         } 
       />
