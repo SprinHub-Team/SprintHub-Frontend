@@ -37,6 +37,48 @@ export const deleteGroup = async (groupId: string) => {
   return data;
 };
 
+// --- Boards ---
+export const getBoards = async (groupId: string) => {
+  const { data } = await api.get(`/boards/group/${groupId}`);
+  return data;
+};
+
+export const createBoard = async (payload: { title: string, description?: string, groupId: string, columnsIds?: string[] }) => {
+  const { data } = await api.post('/boards', payload);
+  return data;
+};
+
+export const updateBoard = async (id: string, payload: { title: string, description?: string, columnsIds?: string[] }) => {
+  const { data } = await api.put(`/boards/${id}`, payload);
+  return data;
+};
+
+export const removeBoard = async (id: string) => {
+  const { data } = await api.delete(`/boards/${id}`);
+  return data;
+};
+
+// --- COLUMNS ---
+export const getColumns = async (boardId: string) => {
+  const { data } = await api.get(`/columns/board/${boardId}`);
+  return data;
+};
+
+export const createColumn = async (payload: { name: string, boardId: string }) => {
+  const { data } = await api.post('/columns', payload);
+  return data;
+};
+
+export const updateColumn = async (id: string, payload: { name?: string, cardsId?: string[] }) => {
+  const { data } = await api.put(`/columns/${id}`, payload);
+  return data;
+};
+
+export const removeColumn = async (id: string) => {
+  const { data } = await api.delete(`/columns/${id}`);
+  return data;
+};
+
 // --- ACTIVIDADES / TARJETAS ---
 export const createCard = async (cardData: any) => {
   const { data } = await api.post('/cards', cardData);
