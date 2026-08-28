@@ -1,0 +1,134 @@
+.kanban-wrapper {
+  padding: 1rem;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f7f6;
+  overflow: hidden;
+}
+
+.kanban-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem 1rem 1rem;
+}
+
+.add-column-bar {
+  padding: 0 1rem 1rem 1rem;
+}
+
+.add-column-bar form {
+  display: flex;
+  gap: 1rem;
+}
+
+.add-column-bar input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.kanban-board {
+  display: flex;
+  flex: 1;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding: 0 1rem 1rem 1rem;
+  align-items: flex-start;
+}
+
+.kanban-column {
+  background-color: #ebecf0;
+  border-radius: 8px;
+  width: 300px;
+  min-width: 300px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: #172b4d;
+}
+
+.card-count {
+  background: #dfe1e6;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.column-content {
+  padding: 0 1rem;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 50px;
+}
+
+.kanban-card {
+  background-color: white;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  position: relative;
+}
+
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+.kanban-card h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #172b4d;
+}
+
+.btn-delete-card {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #999;
+}
+
+.btn-delete-card:hover {
+  color: #dc3545;
+}
+
+.column-footer {
+  padding: 1rem;
+}
+
+.btn-add-card {
+  background: transparent;
+  border: none;
+  color: #5e6c84;
+  cursor: pointer;
+  padding: 0.5rem;
+  width: 100%;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.btn-add-card:hover {
+  background: #091e4214;
+  color: #172b4d;
+}
+
+.column-footer form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  box-sizing: border-box;
+}

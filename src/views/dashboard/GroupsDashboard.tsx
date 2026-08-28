@@ -3,6 +3,8 @@ import { getMyGroups, createGroup, deleteGroup, addMemberToGroup } from '../../s
 import { useAuthStore } from '../../store/useAuthStore';
 import './Dashboard.css';
 
+import { useNavigate } from 'react-router-dom';
+
 const GroupsDashboard: React.FC = () => {
   const [groups, setGroups] = useState<any[]>([]);
   const [newGroupName, setNewGroupName] = useState('');
@@ -15,6 +17,7 @@ const GroupsDashboard: React.FC = () => {
 
   const user = useAuthStore(state => state.user);
   const logout = useAuthStore(state => state.logout);
+  const navigate = useNavigate();
 
   const fetchGroups = async () => {
     try {
@@ -118,7 +121,7 @@ const GroupsDashboard: React.FC = () => {
 
                   <div className="group-actions">
                     {/* Botón ir al tablero... (Próximo módulo de Eduar) */}
-                    <button className="btn-secondary">Ver Tableros</button>
+                    <button className="btn-secondary" onClick={() => navigate(`/groups/${group._id}/boards`)}>Ver Tableros</button>
                     
                     {isIAdmin && (
                       <>
