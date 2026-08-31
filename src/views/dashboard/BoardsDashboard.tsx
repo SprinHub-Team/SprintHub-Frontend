@@ -13,25 +13,10 @@ const BoardsDashboard: React.FC = () => {
   const fetchBoards = async () => {
     if (!groupId) return;
     try {
-<<<<<<< HEAD
-<<<<<<< HEAD
       const res = await getBoards(groupId);
       setBoards(res?.data || res || []);
     } catch (error) {
       console.error('Error fetching boards', error);
-=======
-      const data = await getBoards(groupId);
-      setBoards(data);
-    } catch (error) {
-      console.error('Error fetching boards', error);
-      // Podría ser 404 si no hay tableros, lo manejamos limpiando la lista
->>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
-=======
-      const res = await getBoards(groupId);
-      setBoards(res?.data || res || []);
-    } catch (error) {
-      console.error('Error fetching boards', error);
->>>>>>> e450d2648912958b601df8d794c452142c945724
       setBoards([]);
     }
   };
@@ -49,20 +34,10 @@ const BoardsDashboard: React.FC = () => {
       setDescription('');
       fetchBoards();
     } catch (error: any) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e450d2648912958b601df8d794c452142c945724
       const errorMsg = error.response?.data?.errors 
         ? error.response.data.errors.map((e: any) => `${e.path?.join('.')}: ${e.message}`).join(', ')
         : (error.response?.data?.message || 'Error al crear el tablero');
       alert(errorMsg);
-<<<<<<< HEAD
-=======
-      alert(error.response?.data?.message || 'Error al crear el tablero');
->>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
-=======
->>>>>>> e450d2648912958b601df8d794c452142c945724
     }
   };
 

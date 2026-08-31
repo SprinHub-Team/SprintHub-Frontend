@@ -2,17 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard } from '../../services/sprintHubServices';
+import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, getBoardById, removeColumn } from '../../services/sprintHubServices';
+import EditCardModal from './EditCardModal';
 import './Kanban.css';
 
 const KanbanBoard: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const [columns, setColumns] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
   const [newColumnName, setNewColumnName] = useState('');
   
   const [newCardTitle, setNewCardTitle] = useState('');
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
+  
+  const [editingCard, setEditingCard] = useState<any>(null); // Tarjeta siendo editada
 
   // Filtros
   const [searchTitle, setSearchTitle] = useState('');
@@ -21,32 +25,20 @@ const KanbanBoard: React.FC = () => {
     if (!boardId) return;
     try {
       const filters = searchTitle ? { title: searchTitle } : undefined;
-<<<<<<< HEAD
-<<<<<<< HEAD
-      const [colsRes, cardsRes] = await Promise.all([
+      const [colsRes, cardsRes, boardRes] = await Promise.all([
         getColumns(boardId),
-        getCards(boardId, filters)
+        getCards(boardId, filters),
+        getBoardById(boardId)
       ]);
-      // Dependiendo de si tu backend devuelve un array directo o { data: [...] }
       setColumns(colsRes?.data || colsRes || []);
       setCards(cardsRes?.data || cardsRes || []);
-=======
-      const [colsData, cardsData] = await Promise.all([
-        getColumns(boardId),
-        getCards(boardId, filters)
-      ]);
-      setColumns(colsData);
-      setCards(cardsData);
->>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
-=======
-      const [colsRes, cardsRes] = await Promise.all([
-        getColumns(boardId),
-        getCards(boardId, filters)
-      ]);
-      // Dependiendo de si tu backend devuelve un array directo o { data: [...] }
-      setColumns(colsRes?.data || colsRes || []);
-      setCards(cardsRes?.data || cardsRes || []);
->>>>>>> e450d2648912958b601df8d794c452142c945724
+      
+      // La respuesta del board incluye group que tiene members poblados
+      if (boardRes?.group?.members) {
+        setMembers(boardRes.group.members);
+      } else if (boardRes?.data?.group?.members) {
+        setMembers(boardRes.data.group.members);
+      }
     } catch (error) {
       console.error('Error fetching board data', error);
     }
@@ -54,7 +46,7 @@ const KanbanBoard: React.FC = () => {
 
   useEffect(() => {
     fetchBoardData();
-  }, [boardId, searchTitle]); // Se actualiza al cambiar el buscador
+  }, [boardId, searchTitle]);
 
   const handleCreateColumn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,18 +55,8 @@ const KanbanBoard: React.FC = () => {
       await createColumn({ name: newColumnName, boardId });
       setNewColumnName('');
       fetchBoardData();
-<<<<<<< HEAD
-<<<<<<< HEAD
     } catch (error: any) {
       alert(error.response?.data?.message || 'Error al crear la columna');
-=======
-    } catch (error) {
-      alert('Error al crear la columna');
->>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
-=======
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear la columna');
->>>>>>> e450d2648912958b601df8d794c452142c945724
     }
   };
 
@@ -82,30 +64,22 @@ const KanbanBoard: React.FC = () => {
     e.preventDefault();
     if (!boardId || !newCardTitle) return;
     try {
-<<<<<<< HEAD
-<<<<<<< HEAD
       await createCard({ title: newCardTitle, boardId, columnId });
       setNewCardTitle('');
       setActiveColumnId(null);
       fetchBoardData();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Error al crear la tarjeta');
-=======
-      await createCard({ title: newCardTitle, boardId, listId: columnId });
-      setNewCardTitle('');
-      setActiveColumnId(null);
-      fetchBoardData();
-    } catch (error) {
-      alert('Error al crear la tarjeta');
->>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
-=======
-      await createCard({ title: newCardTitle, boardId, columnId });
-      setNewCardTitle('');
-      setActiveColumnId(null);
+    }
+  };
+
+  const handleUpdateCardDetails = async (cardId: string, data: any) => {
+    try {
+      await updateCard(cardId, data);
+      setEditingCard(null);
       fetchBoardData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear la tarjeta');
->>>>>>> e450d2648912958b601df8d794c452142c945724
+      alert(error.response?.data?.message || 'Error al actualizar la tarjeta');
     }
   };
 
@@ -116,28 +90,12 @@ const KanbanBoard: React.FC = () => {
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
     const updatedCards = cards.map(c => 
-<<<<<<< HEAD
-<<<<<<< HEAD
       c._id === draggableId ? { ...c, columnId: destination.droppableId } : c
-=======
-      c._id === draggableId ? { ...c, listId: destination.droppableId } : c
->>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
-=======
-      c._id === draggableId ? { ...c, columnId: destination.droppableId } : c
->>>>>>> e450d2648912958b601df8d794c452142c945724
     );
     setCards(updatedCards);
 
     try {
-<<<<<<< HEAD
-<<<<<<< HEAD
       await updateCard(draggableId, { columnId: destination.droppableId });
-=======
-      await updateCard(draggableId, { listId: destination.droppableId });
->>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
-=======
-      await updateCard(draggableId, { columnId: destination.droppableId });
->>>>>>> e450d2648912958b601df8d794c452142c945724
       const destColumn = columns.find(c => c._id === destination.droppableId);
       if (destColumn && destColumn.name.toLowerCase().includes('finalizad')) {
         alert('¡Tarea Completada! 🎉');
@@ -148,7 +106,8 @@ const KanbanBoard: React.FC = () => {
     }
   };
 
-  const handleDeleteCard = async (cardId: string) => {
+  const handleDeleteCard = async (e: React.MouseEvent, cardId: string) => {
+    e.stopPropagation(); // Evitar abrir el modal al eliminar
     if (!window.confirm('¿Seguro que deseas eliminar esta tarea?')) return;
     try {
       await deleteCard(cardId);
@@ -190,20 +149,25 @@ const KanbanBoard: React.FC = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="kanban-board">
           {columns.map(col => {
-<<<<<<< HEAD
-<<<<<<< HEAD
             const columnCards = cards.filter(c => c.columnId === col._id || c.columnId === col.id);
-=======
-            const columnCards = cards.filter(c => c.listId === col._id || c.listId === col.id);
->>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
-=======
-            const columnCards = cards.filter(c => c.columnId === col._id || c.columnId === col.id);
->>>>>>> e450d2648912958b601df8d794c452142c945724
             return (
               <div key={col._id} className="kanban-column">
                 <div className="column-header">
                   <h3>{col.name}</h3>
-                  <span className="card-count">{columnCards.length}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="card-count">{columnCards.length}</span>
+                    <button 
+                      onClick={() => {
+                        if(window.confirm('¿Eliminar esta columna y todo su contenido?')) {
+                          removeColumn(col._id).then(fetchBoardData).catch(e => alert(e.response?.data?.message || 'Error'));
+                        }
+                      }} 
+                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                      title="Eliminar columna"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
 
                 <Droppable droppableId={col._id}>
@@ -215,17 +179,43 @@ const KanbanBoard: React.FC = () => {
                     >
                       {columnCards.map((card, index) => (
                         <Draggable key={card._id} draggableId={card._id} index={index}>
-                          {(provided) => (
-                            <div 
-                              className="kanban-card"
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                            >
-                              <h4>{card.title}</h4>
-                              <button onClick={() => handleDeleteCard(card._id)} className="btn-delete-card">×</button>
-                            </div>
-                          )}
+                          {(provided) => {
+                            // Encontrar al miembro asignado
+                            const assignee = members.find(m => (m.user?._id || m.user) === card.assignedTo);
+                            const assigneeName = assignee ? (assignee.user?.name || assignee.user?.email || 'Asignado') : null;
+                            
+                            return (
+                              <div 
+                                className="kanban-card"
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                onClick={() => setEditingCard(card)}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <h4>{card.title}</h4>
+                                  <button onClick={(e) => handleDeleteCard(e, card._id)} className="btn-delete-card">×</button>
+                                </div>
+                                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px' }}>
+                                  {card.priority && (
+                                    <span style={{ fontSize: '0.8rem', padding: '2px 6px', borderRadius: '10px', background: 'var(--accent)', color: 'white', display: 'inline-block' }}>
+                                      {card.priority}
+                                    </span>
+                                  )}
+                                  {assigneeName && (
+                                    <span style={{ fontSize: '0.8rem', padding: '2px 6px', borderRadius: '10px', background: 'var(--bg-secondary)', color: 'var(--text)', display: 'inline-block', border: '1px solid var(--border)' }}>
+                                      👤 {assigneeName}
+                                    </span>
+                                  )}
+                                </div>
+                                {card.tasks && card.tasks.length > 0 && (
+                                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                                    <i className="fas fa-check-square"></i> {card.tasks.filter((t: any) => t.completed).length}/{card.tasks.length}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          }}
                         </Draggable>
                       ))}
                       {provided.placeholder}
@@ -256,6 +246,15 @@ const KanbanBoard: React.FC = () => {
           })}
         </div>
       </DragDropContext>
+      
+      {editingCard && (
+        <EditCardModal 
+          card={editingCard} 
+          members={members}
+          onClose={() => setEditingCard(null)} 
+          onSave={handleUpdateCardDetails} 
+        />
+      )}
     </div>
   );
 };
