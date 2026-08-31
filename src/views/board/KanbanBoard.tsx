@@ -22,6 +22,7 @@ const KanbanBoard: React.FC = () => {
     try {
       const filters = searchTitle ? { title: searchTitle } : undefined;
 <<<<<<< HEAD
+<<<<<<< HEAD
       const [colsRes, cardsRes] = await Promise.all([
         getColumns(boardId),
         getCards(boardId, filters)
@@ -37,6 +38,15 @@ const KanbanBoard: React.FC = () => {
       setColumns(colsData);
       setCards(cardsData);
 >>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
+=======
+      const [colsRes, cardsRes] = await Promise.all([
+        getColumns(boardId),
+        getCards(boardId, filters)
+      ]);
+      // Dependiendo de si tu backend devuelve un array directo o { data: [...] }
+      setColumns(colsRes?.data || colsRes || []);
+      setCards(cardsRes?.data || cardsRes || []);
+>>>>>>> e450d2648912958b601df8d794c452142c945724
     } catch (error) {
       console.error('Error fetching board data', error);
     }
@@ -54,12 +64,17 @@ const KanbanBoard: React.FC = () => {
       setNewColumnName('');
       fetchBoardData();
 <<<<<<< HEAD
+<<<<<<< HEAD
     } catch (error: any) {
       alert(error.response?.data?.message || 'Error al crear la columna');
 =======
     } catch (error) {
       alert('Error al crear la columna');
 >>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
+=======
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error al crear la columna');
+>>>>>>> e450d2648912958b601df8d794c452142c945724
     }
   };
 
@@ -67,6 +82,7 @@ const KanbanBoard: React.FC = () => {
     e.preventDefault();
     if (!boardId || !newCardTitle) return;
     try {
+<<<<<<< HEAD
 <<<<<<< HEAD
       await createCard({ title: newCardTitle, boardId, columnId });
       setNewCardTitle('');
@@ -82,6 +98,14 @@ const KanbanBoard: React.FC = () => {
     } catch (error) {
       alert('Error al crear la tarjeta');
 >>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
+=======
+      await createCard({ title: newCardTitle, boardId, columnId });
+      setNewCardTitle('');
+      setActiveColumnId(null);
+      fetchBoardData();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error al crear la tarjeta');
+>>>>>>> e450d2648912958b601df8d794c452142c945724
     }
   };
 
@@ -93,19 +117,27 @@ const KanbanBoard: React.FC = () => {
 
     const updatedCards = cards.map(c => 
 <<<<<<< HEAD
+<<<<<<< HEAD
       c._id === draggableId ? { ...c, columnId: destination.droppableId } : c
 =======
       c._id === draggableId ? { ...c, listId: destination.droppableId } : c
 >>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
+=======
+      c._id === draggableId ? { ...c, columnId: destination.droppableId } : c
+>>>>>>> e450d2648912958b601df8d794c452142c945724
     );
     setCards(updatedCards);
 
     try {
 <<<<<<< HEAD
+<<<<<<< HEAD
       await updateCard(draggableId, { columnId: destination.droppableId });
 =======
       await updateCard(draggableId, { listId: destination.droppableId });
 >>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
+=======
+      await updateCard(draggableId, { columnId: destination.droppableId });
+>>>>>>> e450d2648912958b601df8d794c452142c945724
       const destColumn = columns.find(c => c._id === destination.droppableId);
       if (destColumn && destColumn.name.toLowerCase().includes('finalizad')) {
         alert('¡Tarea Completada! 🎉');
@@ -159,10 +191,14 @@ const KanbanBoard: React.FC = () => {
         <div className="kanban-board">
           {columns.map(col => {
 <<<<<<< HEAD
+<<<<<<< HEAD
             const columnCards = cards.filter(c => c.columnId === col._id || c.columnId === col.id);
 =======
             const columnCards = cards.filter(c => c.listId === col._id || c.listId === col.id);
 >>>>>>> 26cc57b8569dcb9c7f8ea929ea4a47bf11e3d071
+=======
+            const columnCards = cards.filter(c => c.columnId === col._id || c.columnId === col.id);
+>>>>>>> e450d2648912958b601df8d794c452142c945724
             return (
               <div key={col._id} className="kanban-column">
                 <div className="column-header">
