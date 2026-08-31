@@ -13,11 +13,10 @@ const BoardsDashboard: React.FC = () => {
   const fetchBoards = async () => {
     if (!groupId) return;
     try {
-      const data = await getBoards(groupId);
-      setBoards(data);
+      const res = await getBoards(groupId);
+      setBoards(res?.data || res || []);
     } catch (error) {
       console.error('Error fetching boards', error);
-      // Podría ser 404 si no hay tableros, lo manejamos limpiando la lista
       setBoards([]);
     }
   };
@@ -35,7 +34,10 @@ const BoardsDashboard: React.FC = () => {
       setDescription('');
       fetchBoards();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear el tablero');
+      const errorMsg = error.response?.data?.errors 
+        ? error.response.data.errors.map((e: any) => `${e.path?.join('.')}: ${e.message}`).join(', ')
+        : (error.response?.data?.message || 'Error al crear el tablero');
+      alert(errorMsg);
     }
   };
 

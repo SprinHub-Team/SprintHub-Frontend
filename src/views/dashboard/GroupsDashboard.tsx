@@ -21,10 +21,11 @@ const GroupsDashboard: React.FC = () => {
 
   const fetchGroups = async () => {
     try {
-      const data = await getMyGroups();
-      setGroups(data);
+      const res = await getMyGroups();
+      setGroups(res?.data || res || []);
     } catch (error) {
       console.error('Error fetching groups', error);
+      setGroups([]);
     }
   };
 

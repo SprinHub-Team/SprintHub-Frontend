@@ -21,12 +21,13 @@ const KanbanBoard: React.FC = () => {
     if (!boardId) return;
     try {
       const filters = searchTitle ? { title: searchTitle } : undefined;
-      const [colsData, cardsData] = await Promise.all([
+      const [colsRes, cardsRes] = await Promise.all([
         getColumns(boardId),
         getCards(boardId, filters)
       ]);
-      setColumns(colsData);
-      setCards(cardsData);
+      // Dependiendo de si tu backend devuelve un array directo o { data: [...] }
+      setColumns(colsRes?.data || colsRes || []);
+      setCards(cardsRes?.data || cardsRes || []);
     } catch (error) {
       console.error('Error fetching board data', error);
     }
@@ -43,8 +44,8 @@ const KanbanBoard: React.FC = () => {
       await createColumn({ name: newColumnName, boardId });
       setNewColumnName('');
       fetchBoardData();
-    } catch (error) {
-      alert('Error al crear la columna');
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error al crear la columna');
     }
   };
 
@@ -52,12 +53,12 @@ const KanbanBoard: React.FC = () => {
     e.preventDefault();
     if (!boardId || !newCardTitle) return;
     try {
-      await createCard({ title: newCardTitle, boardId, listId: columnId });
+      await createCard({ title: newCardTitle, boardId, columnId });
       setNewCardTitle('');
       setActiveColumnId(null);
       fetchBoardData();
-    } catch (error) {
-      alert('Error al crear la tarjeta');
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error al crear la tarjeta');
     }
   };
 
@@ -68,12 +69,12 @@ const KanbanBoard: React.FC = () => {
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
     const updatedCards = cards.map(c => 
-      c._id === draggableId ? { ...c, listId: destination.droppableId } : c
+      c._id === draggableId ? { ...c, columnId: destination.droppableId } : c
     );
     setCards(updatedCards);
 
     try {
-      await updateCard(draggableId, { listId: destination.droppableId });
+      await updateCard(draggableId, { columnId: destination.droppableId });
       const destColumn = columns.find(c => c._id === destination.droppableId);
       if (destColumn && destColumn.name.toLowerCase().includes('finalizad')) {
         alert('¡Tarea Completada! 🎉');
@@ -126,7 +127,7 @@ const KanbanBoard: React.FC = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="kanban-board">
           {columns.map(col => {
-            const columnCards = cards.filter(c => c.listId === col._id || c.listId === col.id);
+            const columnCards = cards.filter(c => c.columnId === col._id || c.columnId === col.id);
             return (
               <div key={col._id} className="kanban-column">
                 <div className="column-header">
