@@ -2,17 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard } from '../../services/sprintHubServices';
+import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, getBoardById, removeColumn } from '../../services/sprintHubServices';
+import EditCardModal from './EditCardModal';
 import './Kanban.css';
 
 const KanbanBoard: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const [columns, setColumns] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
   const [newColumnName, setNewColumnName] = useState('');
   
   const [newCardTitle, setNewCardTitle] = useState('');
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
+  
+  const [editingCard, setEditingCard] = useState<any>(null); // Tarjeta siendo editada
 
   // Filtros
   const [searchTitle, setSearchTitle] = useState('');
@@ -35,7 +39,7 @@ const KanbanBoard: React.FC = () => {
 
   useEffect(() => {
     fetchBoardData();
-  }, [boardId, searchTitle]); // Se actualiza al cambiar el buscador
+  }, [boardId, searchTitle]);
 
   const handleCreateColumn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +89,8 @@ const KanbanBoard: React.FC = () => {
     }
   };
 
-  const handleDeleteCard = async (cardId: string) => {
+  const handleDeleteCard = async (e: React.MouseEvent, cardId: string) => {
+    e.stopPropagation(); // Evitar abrir el modal al eliminar
     if (!window.confirm('¿Seguro que deseas eliminar esta tarea?')) return;
     try {
       await deleteCard(cardId);
@@ -132,7 +137,20 @@ const KanbanBoard: React.FC = () => {
               <div key={col._id} className="kanban-column">
                 <div className="column-header">
                   <h3>{col.name}</h3>
-                  <span className="card-count">{columnCards.length}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="card-count">{columnCards.length}</span>
+                    <button 
+                      onClick={() => {
+                        if(window.confirm('¿Eliminar esta columna y todo su contenido?')) {
+                          removeColumn(col._id).then(fetchBoardData).catch(e => alert(e.response?.data?.message || 'Error'));
+                        }
+                      }} 
+                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                      title="Eliminar columna"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
 
                 <Droppable droppableId={col._id}>
@@ -144,17 +162,43 @@ const KanbanBoard: React.FC = () => {
                     >
                       {columnCards.map((card, index) => (
                         <Draggable key={card._id} draggableId={card._id} index={index}>
-                          {(provided) => (
-                            <div 
-                              className="kanban-card"
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                            >
-                              <h4>{card.title}</h4>
-                              <button onClick={() => handleDeleteCard(card._id)} className="btn-delete-card">×</button>
-                            </div>
-                          )}
+                          {(provided) => {
+                            // Encontrar al miembro asignado
+                            const assignee = members.find(m => (m.user?._id || m.user) === card.assignedTo);
+                            const assigneeName = assignee ? (assignee.user?.name || assignee.user?.email || 'Asignado') : null;
+                            
+                            return (
+                              <div 
+                                className="kanban-card"
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                onClick={() => setEditingCard(card)}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <h4>{card.title}</h4>
+                                  <button onClick={(e) => handleDeleteCard(e, card._id)} className="btn-delete-card">×</button>
+                                </div>
+                                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px' }}>
+                                  {card.priority && (
+                                    <span style={{ fontSize: '0.8rem', padding: '2px 6px', borderRadius: '10px', background: 'var(--accent)', color: 'white', display: 'inline-block' }}>
+                                      {card.priority}
+                                    </span>
+                                  )}
+                                  {assigneeName && (
+                                    <span style={{ fontSize: '0.8rem', padding: '2px 6px', borderRadius: '10px', background: 'var(--bg-secondary)', color: 'var(--text)', display: 'inline-block', border: '1px solid var(--border)' }}>
+                                      👤 {assigneeName}
+                                    </span>
+                                  )}
+                                </div>
+                                {card.tasks && card.tasks.length > 0 && (
+                                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                                    <i className="fas fa-check-square"></i> {card.tasks.filter((t: any) => t.completed).length}/{card.tasks.length}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          }}
                         </Draggable>
                       ))}
                       {provided.placeholder}
@@ -185,6 +229,15 @@ const KanbanBoard: React.FC = () => {
           })}
         </div>
       </DragDropContext>
+      
+      {editingCard && (
+        <EditCardModal 
+          card={editingCard} 
+          members={members}
+          onClose={() => setEditingCard(null)} 
+          onSave={handleUpdateCardDetails} 
+        />
+      )}
     </div>
   );
 };

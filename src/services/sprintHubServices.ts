@@ -43,6 +43,11 @@ export const getBoards = async (groupId: string) => {
   return data;
 };
 
+export const getBoardById = async (boardId: string) => {
+  const { data } = await api.get(`/boards/${boardId}`);
+  return data;
+};
+
 export const createBoard = async (payload: { title: string, description?: string, groupId: string, columnsIds?: string[] }) => {
   const { data } = await api.post('/boards', payload);
   return data;
