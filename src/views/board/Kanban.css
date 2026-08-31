@@ -76,9 +76,7 @@
 }
 
 .kanban-column {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--bg-secondary);
   border-radius: 16px;
   min-width: 320px;
   width: 320px;
