@@ -12,8 +12,8 @@ export const loginUser = async (credentials: any) => {
 };
 
 export const logoutUser = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
 };
 
 // --- GRUPOS DE TRABAJO ---
@@ -85,7 +85,7 @@ export const createCard = async (cardData: any) => {
   return data;
 };
 
-export const getCards = async (boardId: string, filters?: { title?: string; listId?: string; assignedTo?: string }) => {
+export const getCards = async (boardId: string, filters?: { title?: string; columnId?: string; assignedTo?: string }) => {
   const { data } = await api.get(`/cards/board/${boardId}`, { params: filters });
   return data;
 };

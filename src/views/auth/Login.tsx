@@ -19,7 +19,15 @@ const Login: React.FC = () => {
       login(data.user, data.token);
       navigate('/dashboard'); // Ir al panel de grupos
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al iniciar sesión');
+      if (err.response?.data?.errors) {
+        const errorMsgs = Object.values(err.response.data.errors)
+          .map((e: any) => e?._errors?.join(', '))
+          .filter(Boolean)
+          .join(' | ');
+        setError(errorMsgs || err.response.data.message);
+      } else {
+        setError(err.response?.data?.message || 'Error al iniciar sesión');
+      }
     }
   };
 

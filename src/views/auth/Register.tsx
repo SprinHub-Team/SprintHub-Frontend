@@ -24,7 +24,16 @@ const Register: React.FC = () => {
       await registerUser(formData);
       navigate('/login');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al registrar usuario');
+      if (err.response?.data?.errors) {
+        // Extraer los mensajes de zod si existen
+        const errorMsgs = Object.values(err.response.data.errors)
+          .map((e: any) => e?._errors?.join(', '))
+          .filter(Boolean)
+          .join(' | ');
+        setError(errorMsgs || err.response.data.message);
+      } else {
+        setError(err.response?.data?.message || 'Error al registrar usuario');
+      }
     }
   };
 
