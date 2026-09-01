@@ -1,14 +1,25 @@
+import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppRoutes } from './routes/AppRoutes';
-import { useSocket } from './hooks/useSocket'; // Mantenemos el test de socket si queremos
+import { useSocket } from './hooks/useSocket'; 
 import { useInactivityTimeout } from './hooks/useInactivityTimeout';
+import { useAuthStore } from './store/useAuthStore';
+import { getUserProfile } from './services/sprintHubServices';
 import './App.css';
 
 function App() {
-  // Inicializamos el socket globalmente (opcional)
   useSocket();
-  // Cierre de sesión automático tras 30 min sin actividad
   useInactivityTimeout();
+  
+  const token = useAuthStore(state => state.token);
+
+  useEffect(() => {
+    if (token) {
+      getUserProfile().catch(() => {
+        // Interceptor clears session if 401 or 404
+      });
+    }
+  }, [token]);
 
   return (
     <BrowserRouter>
@@ -16,5 +27,4 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default App;

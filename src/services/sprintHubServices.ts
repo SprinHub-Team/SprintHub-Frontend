@@ -104,3 +104,24 @@ export const deleteCard = async (cardId: string) => {
   const { data } = await api.delete(`/cards/${cardId}`);
   return data;
 };
+
+// --- COMENTARIOS ---
+export const createComment = async (commentData: { name: string, description: string, cardId: string, createdFor?: string }) => {
+  const { data } = await api.post('/comments', commentData);
+  return data;
+};
+
+export const getCommentsByCard = async (cardId: string) => {
+  const { data } = await api.get(`/comments/card/${cardId}`);
+  return data;
+};
+
+export const deleteComment = async (commentId: string) => {
+  const { data } = await api.delete(`/comments/${commentId}`);
+  return data;
+};
+
+export const getUserProfile = async () => {
+  const { data } = await api.get('/users/me');
+  return data;
+};

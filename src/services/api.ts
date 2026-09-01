@@ -15,4 +15,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Interceptor para desloguear si el token expira o es inválido
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      (error.response && error.response.status === 401) || 
+      (error.response && error.response.status === 404 && error.config.url.includes('/users/me'))
+    ) {
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
