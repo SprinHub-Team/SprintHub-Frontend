@@ -25,13 +25,19 @@ const KanbanBoard: React.FC = () => {
     if (!boardId) return;
     try {
       const filters = searchTitle ? { title: searchTitle } : undefined;
-      const [colsRes, cardsRes] = await Promise.all([
+      const [colsRes, cardsRes, boardRes] = await Promise.all([
         getColumns(boardId),
-        getCards(boardId, filters)
+        getCards(boardId, filters),
+        getBoardById(boardId)
       ]);
-      // Dependiendo de si tu backend devuelve un array directo o { data: [...] }
       setColumns(colsRes?.data || colsRes || []);
       setCards(cardsRes?.data || cardsRes || []);
+      
+      if (boardRes?.group?.members) {
+        setMembers(boardRes.group.members);
+      } else if (boardRes?.data?.group?.members) {
+        setMembers(boardRes.data.group.members);
+      }
     } catch (error) {
       console.error('Error fetching board data', error);
     }
@@ -63,6 +69,16 @@ const KanbanBoard: React.FC = () => {
       fetchBoardData();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Error al crear la tarjeta');
+    }
+  };
+
+  const handleUpdateCardDetails = async (cardId: string, data: any) => {
+    try {
+      await updateCard(cardId, data);
+      setEditingCard(null);
+      fetchBoardData();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error al actualizar la tarjeta');
     }
   };
 
