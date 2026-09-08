@@ -8,7 +8,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const login = useAuthStore((state) => state.login);
+  const login = useAuthStore((state: any) => state.login);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,10 +33,26 @@ const Login: React.FC = () => {
 
   return (
     <div className="auth-container">
+      {/* Animated Kanban Background */}
+      <div className="kanban-bg-animation">
+        <div className="kb-col">
+          <div className="kb-card"></div>
+          <div className="kb-card"></div>
+        </div>
+        <div className="kb-col">
+          <div className="kb-card"></div>
+          <div className="kb-card"></div>
+          <div className="kb-card"></div>
+        </div>
+        <div className="kb-col">
+          <div className="kb-card"></div>
+        </div>
+      </div>
+
       <div className="auth-card">
         <h2>Iniciar Sesión</h2>
         {error && <p className="auth-error">{error}</p>}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label>Correo Electrónico</label>
             <input 
