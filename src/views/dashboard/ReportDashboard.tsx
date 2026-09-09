@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getGroupPerformanceReport, getUserPerformanceReport, getCompletedActivitiesReport, getMyGroups, getBoardById } from '../../services/sprintHubServices';
+
 import './ReportDashboard.css';
 
 const ReportDashboard: React.FC = () => {
@@ -104,9 +105,11 @@ const ReportDashboard: React.FC = () => {
   };
 
   return (
-    <div className="dashboard-container report-view">
-      <header className="dashboard-header report-header">
-        <div>
+    <div className="dashboard-container report-view" style={{ padding: '0' }}>
+      
+      <div style={{ padding: '0 20px 20px 20px' }}>
+        <header className="dashboard-header report-header">
+          <div>
           <h1>Reportes y Análisis</h1>
           <p className="subtitle">Métricas de desempeño del equipo y control de actividades</p>
         </div>
@@ -278,6 +281,7 @@ const ReportDashboard: React.FC = () => {
             </div>
           )}
         </section>
+      </div>
       </div>
     </div>
   );

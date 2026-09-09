@@ -5,10 +5,14 @@ import type { DropResult } from '@hello-pangea/dnd';
 import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, getBoardById, removeColumn } from '../../services/sprintHubServices';
 import EditCardModal from './EditCardModal';
 import ReportModal from './ReportModal';
+
 import './Kanban.css';
 
 const KanbanBoard: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
+  const [groupId, setGroupId] = useState<string>('');
+  console.log(groupId);
+  
   const [columns, setColumns] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
@@ -36,6 +40,10 @@ const KanbanBoard: React.FC = () => {
       setColumns(colsRes?.data || colsRes || []);
       setCards(cardsRes?.data || cardsRes || []);
       
+      const bData = boardRes?.data || boardRes;
+      if (bData?.groupId) setGroupId(bData.groupId);
+      else if (bData?.group?._id) setGroupId(bData.group._id);
+
       if (boardRes?.group?.members) {
         setMembers(boardRes.group.members);
       } else if (boardRes?.data?.group?.members) {
@@ -120,8 +128,10 @@ const KanbanBoard: React.FC = () => {
   };
 
   return (
-    <div className="kanban-wrapper">
-      <header className="kanban-header">
+    <div className="kanban-wrapper" style={{ padding: '0', display: 'flex', flexDirection: 'column' }}>
+      
+      <div style={{ padding: '0 20px 20px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <header className="kanban-header">
         <h1>Tablero Kanban</h1>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <div className="filters" style={{ display: 'flex', gap: '10px' }}>
@@ -290,6 +300,7 @@ const KanbanBoard: React.FC = () => {
           onClose={() => setShowReport(false)}
         />
       )}
+      </div>
     </div>
   );
 };

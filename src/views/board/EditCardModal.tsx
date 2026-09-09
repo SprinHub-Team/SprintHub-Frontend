@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Kanban.css'; 
-import { getCommentsByCard, createComment, deleteComment } from '../../services/sprintHubServices';
+import { getCommentsByCard, createComment, deleteComment, uploadAttachment, removeAttachment } from '../../services/sprintHubServices';
 import { useAuthStore } from '../../store/useAuthStore';
 
 interface Task {
@@ -17,6 +17,8 @@ interface EditCardModalProps {
 
 const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClose, onSave }) => {
   const user = useAuthStore(state => state.user);
+  const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const baseUrl = backendUrl.replace('/api', '');
   
   const [title, setTitle] = useState(card.title || '');
   const [description, setDescription] = useState(card.description || '');
@@ -24,6 +26,8 @@ const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClo
   const [tasks, setTasks] = useState<Task[]>(card.tasks || []);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [assignedTo, setAssignedTo] = useState(card.assignedTo || '');
+  const [attachments, setAttachments] = useState<any[]>(card.attachments || []);
+  const [uploading, setUploading] = useState(false);
 
   // Comments state
   const [comments, setComments] = useState<any[]>([]);
@@ -86,6 +90,36 @@ const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClo
     if (!newTaskTitle.trim()) return;
     setTasks([...tasks, { title: newTaskTitle, completed: false }]);
     setNewTaskTitle('');
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      const updatedCard = await uploadAttachment(card._id, file);
+      if (updatedCard && updatedCard.attachments) {
+        setAttachments(updatedCard.attachments);
+      }
+      e.target.value = ''; // Reset input
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error al subir documento');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveFile = async (attachmentId: string) => {
+    if (!window.confirm('¿Seguro que deseas eliminar este documento?')) return;
+    try {
+      const updatedCard = await removeAttachment(card._id, attachmentId);
+      if (updatedCard && updatedCard.attachments) {
+        setAttachments(updatedCard.attachments);
+      }
+    } catch (error: any) {
+      alert('Error al eliminar el documento');
+    }
   };
 
   const toggleTask = (index: number) => {
@@ -162,6 +196,44 @@ const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClo
                 ))}
               </select>
             </div>
+          </div>
+
+          <div className="form-group attachments-section">
+            <label>Documentos Adjuntos</label>
+            <div style={{ marginBottom: '10px' }}>
+              <input 
+                type="file" 
+                accept=".pdf,.xlsx,.xls"
+                onChange={handleFileUpload}
+                id={`upload-file-${card._id}`}
+                style={{ display: 'none' }}
+                disabled={uploading}
+              />
+              <label 
+                htmlFor={`upload-file-${card._id}`}
+                className="btn-secondary" 
+                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px' }}
+              >
+                <i className="fas fa-paperclip"></i> {uploading ? 'Subiendo...' : 'Añadir documento (.pdf, .xlsx)'}
+              </label>
+            </div>
+            {attachments.length > 0 && (
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {attachments.map((att: any) => (
+                  <li key={att._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '8px 12px', borderRadius: '6px', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <i className={`fas fa-file-${att.fileName.endsWith('.pdf') ? 'pdf' : 'excel'}`} style={{ color: att.fileName.endsWith('.pdf') ? '#ef4444' : '#10b981' }}></i>
+                      <a href={`${baseUrl}${att.fileUrl}`} target="_blank" rel="noopener noreferrer" download={att.fileName} style={{ color: '#579dff', textDecoration: 'none', fontSize: '0.9rem' }}>
+                        {att.fileName}
+                      </a>
+                    </div>
+                    <button type="button" onClick={() => handleRemoveFile(att._id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Eliminar documento">
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="form-group checklist-section">

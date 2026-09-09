@@ -11,20 +11,29 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
   const setUser = useAuthStore((state: any) => state.setUser);
   
   const [name, setName] = useState(user?.name || '');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
-      // Eduar's API for update user? Let's check sprintHubServices or just use generic PUT /users/:id
-      const res = await api.put(`/users/${user?.id || user?._id}`, { name });
-      const updatedUser = res.data?.data || res.data || { ...user, name };
+      const payload: any = { name };
+      if (password) payload.password = password;
+      const res = await api.put(`/users/${user?.id || user?._id}`, payload);
+      const rawUser = res.data?.data || res.data || {};
+      const updatedUser = {
+        ...user,
+        ...rawUser,
+        name: rawUser.name || name,
+        id: rawUser.id || rawUser._id || user?.id || user?._id,
+      };
       setUser(updatedUser);
       alert('Perfil actualizado con éxito');
       onClose();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al actualizar perfil');
+      console.error('Error al actualizar perfil:', error);
+      alert(error.response?.data?.message || error.message || 'Error al actualizar perfil');
     } finally {
       setLoading(false);
     }
@@ -56,6 +65,16 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
               value={user?.email || ''}
               disabled
               style={{ width: '100%', padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#6b7280', cursor: 'not-allowed' }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', color: '#9fadbc', fontSize: '0.9rem' }}>Nueva Contraseña (Opcional)</label>
+            <input 
+              type="password" 
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Deja en blanco para no cambiar"
+              style={{ width: '100%', padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
             />
           </div>
           <div className="modal-actions" style={{ marginTop: '10px' }}>

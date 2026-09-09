@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-import { getBoardById } from '../services/sprintHubServices';
+import { getBoardById, getMyGroups } from '../services/sprintHubServices';
 import BoardSwitcher from './BoardSwitcher';
 import BoardSettingsModal from '../views/board/BoardSettingsModal';
 import ProfileSettingsModal from '../views/auth/ProfileSettingsModal';
@@ -21,6 +21,25 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
   
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+
+  const [groups, setGroups] = useState<any[]>([]);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const res = await getMyGroups();
+        setGroups(res?.data || res || []);
+      } catch(err) {
+        console.error(err);
+      }
+    };
+    if (user) fetchGroups();
+  }, [user]);
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
+  };
 
   useEffect(() => {
     const handleOpenSettings = async (e: any) => {
@@ -86,7 +105,7 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
                 </div>
                 <div className="dropdown-divider"></div>
                 <button className="dropdown-item" onClick={() => { setShowProfileMenu(false); setShowProfileModal(true); }}>
-                  <i className="fas fa-user-edit"></i> Editar Perfil
+                  <i className="fas fa-cog"></i> Configuración
                 </button>
                 <div className="dropdown-divider"></div>
                 <button className="dropdown-item danger" onClick={logout}>
@@ -100,53 +119,73 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
 
       <div className="jira-body">
         {/* Left Sidebar */}
-        <aside className="jira-sidebar">
+        <aside className="jira-sidebar" style={{ overflowY: 'auto' }}>
           <div className="sidebar-group">
-            <Link to="/wip" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}><i className="fas fa-user-circle"></i> Para ti</Link>
-            <Link to="/wip" className="sidebar-item has-arrow" style={{textDecoration:'none', color:'inherit'}}><i className="far fa-clock"></i> Recientes <i className="fas fa-chevron-right arrow"></i></Link>
-            <Link to="/wip" className="sidebar-item has-arrow" style={{textDecoration:'none', color:'inherit'}}><i className="far fa-star"></i> Marcados como favoritos <i className="fas fa-chevron-right arrow"></i></Link>
-            <Link to="/wip" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}><i className="fas fa-cubes"></i> Aplicaciones</Link>
-            <Link to="/wip" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}><i className="fas fa-stream"></i> Planes</Link>
+            <Link to="/dashboard" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
+              <i className="fas fa-columns"></i> Tableros
+            </Link>
+            <Link to="/wip" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
+              <i className="fas fa-copy"></i> Plantillas
+            </Link>
+            <Link to="/dashboard" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
+              <i className="fas fa-home"></i> Inicio
+            </Link>
           </div>
           
           <div className="sidebar-divider"></div>
           
           <div className="sidebar-group">
-            <div className="sidebar-header">
-              <span>Espacio</span>
-              <div>
-                <Link to="/wip" style={{color:'inherit'}}><i className="fas fa-plus"></i></Link>
-                <Link to="/wip" style={{color:'inherit', marginLeft: '12px'}}><i className="fas fa-ellipsis-h"></i></Link>
-              </div>
+            <div className="sidebar-section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Espacios de trabajo</span>
+              <Link to="/dashboard" style={{color:'inherit'}}><i className="fas fa-plus"></i></Link>
             </div>
             
-            <div className="sidebar-section-title">Recientes</div>
-            <Link to="/dashboard" className={`sidebar-item ${location.pathname === '/dashboard' ? 'active' : ''}`} style={{textDecoration:'none', color:'inherit'}}>
-              <div className="project-icon"></div> SprintHub
-            </Link>
-            
-            <Link to="/wip" className="sidebar-item has-arrow" style={{textDecoration:'none', color:'inherit'}}><i className="fas fa-layer-group"></i> Más espacios <i className="fas fa-chevron-right arrow"></i></Link>
-          </div>
-          
-          <div className="sidebar-group">
-            <div className="sidebar-section-title">Recomendado</div>
-            <Link to="/wip" className="sidebar-item promo" style={{textDecoration:'none', color:'inherit'}}>
-              <div className="promo-icon"></div> Recopilar solicitudes... <span className="badge">Probar</span>
-            </Link>
-          </div>
-          
-          <div className="sidebar-divider"></div>
-          
-          <div className="sidebar-group">
-            <Link to="/wip" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}><i className="fas fa-filter"></i> Filtros</Link>
-            <Link to="/wip" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}><i className="fas fa-columns"></i> Paneles</Link>
-          </div>
-          
-          <div className="sidebar-divider"></div>
-          
-          <div className="sidebar-group bottom-links">
-            <a href="#" className="sidebar-item external" style={{textDecoration:'none', color:'inherit'}}><i className="fas fa-book"></i> Confluence <i className="fas fa-external-link-alt external-icon"></i></a>
-            <a href="#" className="sidebar-item external" style={{textDecoration:'none', color:'inherit'}}><i className="fas fa-users"></i> Equipos <i className="fas fa-external-link-alt external-icon"></i></a>
+            {groups.map(g => (
+              <div key={g._id} style={{ marginBottom: '4px' }}>
+                <div 
+                  className="sidebar-item" 
+                  onClick={() => toggleGroup(g._id)}
+                  style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', paddingRight: '16px' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div className="project-icon" style={{ background: '#0052cc', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '10px' }}>
+                      {g.name.substring(0,2).toUpperCase()}
+                    </div>
+                    <span style={{ marginLeft: '10px', fontSize: '0.9rem' }}>{g.name}</span>
+                  </div>
+                  <i className={`fas fa-chevron-${expandedGroups[g._id] ? 'up' : 'down'}`} style={{ fontSize: '0.7rem', color: '#9fadbc' }}></i>
+                </div>
+                
+                {expandedGroups[g._id] && (
+                  <div className="sidebar-group-children fade-down">
+                    <Link to={`/groups/${g._id}/boards`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/boards`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
+                      <i className="fas fa-columns" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Tableros
+                    </Link>
+                    
+                    <Link to={`/groups/${g._id}/members`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/members`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div><i className="fas fa-user-friends" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Miembros</div>
+                      <i className="fas fa-plus" style={{ fontSize: '0.7rem', opacity: 0.8 }} title="Invitar miembros"></i>
+                    </Link>
+
+                    {/* Solo mostrar Resumen y Backlog si el usuario está interactuando con un tablero, backlog o estas vistas */}
+                    {(location.pathname.includes('/board/') || location.pathname.includes('/backlog') || location.pathname.includes('/reports') || location.pathname.includes('/documents')) && (
+                      <>
+                        <Link to={`/groups/${g._id}/reports`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/reports`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
+                          <i className="fas fa-chart-pie" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Resumen
+                        </Link>
+                        <Link to={`/groups/${g._id}/backlog`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/backlog`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
+                          <i className="fas fa-list" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Backlog
+                        </Link>
+                      </>
+                    )}
+                    
+                    <Link to="/wip" className="sidebar-item" style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
+                      <i className="fas fa-cog" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Configuración
+                    </Link>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </aside>
 
@@ -181,34 +220,62 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
             
             <div className="modern-tabs">
               {(() => {
-                const match = location.pathname.match(/\/board\/([a-zA-Z0-9_]+)/);
-                const boardId = match ? match[1] : null;
+                const boardMatch = location.pathname.match(/\/board\/([a-zA-Z0-9_]+)/);
+                const boardId = boardMatch ? boardMatch[1] : null;
+                
+                const groupMatch = location.pathname.match(/\/groups\/([a-zA-Z0-9_]+)/);
+                let currentGroupId = groupMatch ? groupMatch[1] : null;
+
+                if (currentGroupId) {
+                  localStorage.setItem('currentGroupId', currentGroupId);
+                } else if (boardId) {
+                  currentGroupId = localStorage.getItem('currentGroupId');
+                }
+
                 const path = location.pathname;
 
                 if (boardId) {
+                  // Inside a board: Show General + all project tabs
+                  // To link to group-level features like Backlog and Documents, we need the groupId.
+                  // Since JiraLayout might not know the exact groupId of the board synchronously, 
+                  // we can fallback to the first expanded group or omit if unavailable, but 
+                  // usually we pass it or it's not strictly needed for UI presentation if handled well.
+                  // A better approach is to render the exact tabs requested:
                   return (
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                       <div style={{ display: 'flex' }}>
+                        <div className="m-tab active"><i className="fas fa-border-all"></i> General</div>
                         <Link to={`/board/${boardId}/reports`} className={`m-tab ${path.includes('/reports') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                          <i className="fas fa-chart-pie"></i> Reportes
-                        </Link>
-                        <Link to={`/board/${boardId}`} className={`m-tab ${path === `/board/${boardId}` ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                          <i className="fas fa-border-all"></i> Tablero
+                          <i className="fas fa-chart-pie"></i> Resumen
                         </Link>
                         <Link to={`/board/${boardId}/list`} className={`m-tab ${path.includes('/list') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                           <i className="fas fa-stream"></i> Lista
                         </Link>
-                        <Link to={`/board/${boardId}/timeline`} className={`m-tab ${path.includes('/timeline') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <Link to={`/board/${boardId}`} className={`m-tab ${path === `/board/${boardId}` ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-columns"></i> Tablero
+                        </Link>
+                        {currentGroupId && (
+                          <>
+                            <Link to={`/groups/${currentGroupId}/backlog`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                              <i className="fas fa-list"></i> Backlog
+                            </Link>
+                            <Link to={`/groups/${currentGroupId}/documents`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                              <i className="fas fa-folder-open"></i> Documentación
+                            </Link>
+                          </>
+                        )}
+                        <Link to={`/wip`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-code"></i> Desarrollo
+                        </Link>
+                        <Link to={`/wip`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-wpforms"></i> Formularios
+                        </Link>
+                        <Link to={`/wip`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
                           <i className="fas fa-calendar-alt"></i> Cronograma
                         </Link>
-                        <Link to={`/board/${boardId}/automations`} className={`m-tab ${path.includes('/automations') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                          <i className="fas fa-bolt"></i> Automatizaciones
-                        </Link>
-                        <div className="m-tab add-m-tab"><i className="fas fa-plus"></i></div>
                       </div>
                       
                       <div className="board-settings-action">
-                        {/* We will trigger an event or modal via a global state or simple prop later */}
                         <button 
                           className="icon-btn tooltip" 
                           data-tooltip="Configuración del tablero" 
@@ -222,6 +289,32 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
                   );
                 }
                 
+                if (currentGroupId) {
+                  return (
+                    <div style={{ display: 'flex' }}>
+                      <Link to={`/groups/${currentGroupId}/boards`} className={`m-tab ${path.includes('/boards') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <i className="fas fa-border-all"></i> General
+                      </Link>
+                      {(path.includes('/backlog') || path.includes('/members') || path.includes('/reports') || path.includes('/documents')) && (
+                        <>
+                          <Link to={`/groups/${currentGroupId}/reports`} className={`m-tab ${path.includes('/reports') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <i className="fas fa-chart-pie"></i> Resumen
+                          </Link>
+                          <Link to={`/groups/${currentGroupId}/backlog`} className={`m-tab ${path.includes('/backlog') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <i className="fas fa-list"></i> Backlog
+                          </Link>
+                          <Link to={`/groups/${currentGroupId}/documents`} className={`m-tab ${path.includes('/documents') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <i className="fas fa-folder-open"></i> Documentación
+                          </Link>
+                          <Link to={`/wip`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <i className="fas fa-code"></i> Desarrollo
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                  );
+                }
+
                 return (
                   <>
                     <div className="m-tab active"><i className="fas fa-border-all"></i> General</div>

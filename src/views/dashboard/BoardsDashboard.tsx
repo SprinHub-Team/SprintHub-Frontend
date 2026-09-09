@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getBoards, createBoard, removeBoard } from '../../services/sprintHubServices';
+
 import './Dashboard.css';
 
 const BoardsDashboard: React.FC = () => {
@@ -55,9 +56,11 @@ const BoardsDashboard: React.FC = () => {
   };
 
   return (
-    <div className="" style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
-        <div>
+    <div className="" style={{ padding: '0' }}>
+      
+      <div style={{ padding: '0 20px 20px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+          <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: '0 0 10px 0', color: '#f8fafc' }}>
             Tableros del Grupo
           </h1>
@@ -154,6 +157,7 @@ const BoardsDashboard: React.FC = () => {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };

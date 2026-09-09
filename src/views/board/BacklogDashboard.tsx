@@ -6,6 +6,7 @@ import {
   getBoards, getColumns
 } from '../../services/sprintHubServices';
 
+
 const BacklogDashboard: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const [backlogCards, setBacklogCards] = useState<any[]>([]);
@@ -182,9 +183,11 @@ const BacklogDashboard: React.FC = () => {
   };
 
   return (
-    <div className="" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-        <div>
+    <div className="" style={{ padding: '0', maxWidth: '1200px', margin: '0 auto' }}>
+      
+      <div style={{ padding: '0 20px 20px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+          <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: '0 0 10px 0', color: '#f8fafc' }}>
             Product Backlog
           </h1>
@@ -391,7 +394,7 @@ const BacklogDashboard: React.FC = () => {
           </div>
         </div>
       )}
-
+      </div>
     </div>
   );
 };

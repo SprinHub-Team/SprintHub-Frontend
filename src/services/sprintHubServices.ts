@@ -27,6 +27,11 @@ export const getMyGroups = async () => {
   return data;
 };
 
+export const getGroupById = async (groupId: string) => {
+  const { data } = await api.get(`/groups/${groupId}`);
+  return data;
+};
+
 export const addMemberToGroup = async (groupId: string, email: string, role: string) => {
   const { data } = await api.post(`/groups/${groupId}/members`, { email, role });
   return data;
@@ -102,6 +107,20 @@ export const updateCard = async (cardId: string, updates: any) => {
 
 export const deleteCard = async (cardId: string) => {
   const { data } = await api.delete(`/cards/${cardId}`);
+  return data;
+};
+
+export const uploadAttachment = async (cardId: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post(`/cards/${cardId}/attachments`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return data;
+};
+
+export const removeAttachment = async (cardId: string, attachmentId: string) => {
+  const { data } = await api.delete(`/cards/${cardId}/attachments/${attachmentId}`);
   return data;
 };
 

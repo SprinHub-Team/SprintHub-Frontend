@@ -73,10 +73,10 @@ const GroupsDashboard: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: '0 0 10px 0', color: '#f8fafc' }}>
-            Hola, {user?.name?.split(' ')[0]} 👋
+            ¡Bienvenido, {user?.name || 'Usuario'}!
           </h1>
           <p style={{ color: '#94a3b8', margin: 0, fontSize: '1.1rem' }}>
-            Aquí tienes un resumen de tus espacios de trabajo.
+            Selecciona un espacio de trabajo para comenzar o crea uno nuevo.
           </p>
         </div>
         <button type="button" onClick={() => setShowCreateModal(true)} className="btn-primary" style={{ padding: '12px 24px', borderRadius: '12px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>

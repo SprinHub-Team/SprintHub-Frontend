@@ -8,12 +8,13 @@ import BoardsDashboard from '../views/dashboard/BoardsDashboard';
 import KanbanBoard from '../views/board/KanbanBoard';
 import ReportDashboard from '../views/dashboard/ReportDashboard';
 import BacklogDashboard from '../views/board/BacklogDashboard';
+import MembersDashboard from '../views/dashboard/MembersDashboard';
+import ProjectDocuments from '../views/dashboard/ProjectDocuments';
 import WorkInProgress from '../views/board/WorkInProgress';
 import JiraLayout from '../layout/JiraLayout';
 import { useAuthStore } from '../store/useAuthStore';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 
-// Un componente para proteger rutas
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = useAuthStore((state) => state.token);
   if (!token) {
@@ -35,6 +36,8 @@ export const AppRoutes: React.FC = () => {
       <Route path="/groups/:groupId/boards" element={<ProtectedRoute><BoardsDashboard /></ProtectedRoute>} />
       <Route path="/groups/:groupId/reports" element={<ProtectedRoute><ErrorBoundary><ReportDashboard /></ErrorBoundary></ProtectedRoute>} />
       <Route path="/groups/:groupId/backlog" element={<ProtectedRoute><BacklogDashboard /></ProtectedRoute>} />
+      <Route path="/groups/:groupId/members" element={<ProtectedRoute><MembersDashboard /></ProtectedRoute>} />
+      <Route path="/groups/:groupId/documents" element={<ProtectedRoute><ProjectDocuments /></ProtectedRoute>} />
       <Route path="/board/:boardId" element={<ProtectedRoute><KanbanBoard /></ProtectedRoute>} />
       <Route path="/board/:boardId/reports" element={<ProtectedRoute><ErrorBoundary><ReportDashboard /></ErrorBoundary></ProtectedRoute>} />
       <Route path="/board/:boardId/list" element={<ProtectedRoute><WorkInProgress title="Lista" icon="fas fa-stream" /></ProtectedRoute>} />
