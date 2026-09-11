@@ -93,6 +93,16 @@ const KanbanBoard: React.FC = () => {
     }
   };
 
+  const handleUpdateCardDetails = async (cardId: string, data: any) => {
+    try {
+      await updateCard(cardId, data);
+      setEditingCard(null);
+      fetchBoardData();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error al actualizar la tarjeta');
+    }
+  };
+
   const handleDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
