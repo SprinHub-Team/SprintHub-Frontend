@@ -4,10 +4,15 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, getBoardById, removeColumn } from '../../services/sprintHubServices';
 import EditCardModal from './EditCardModal';
+import ReportModal from './ReportModal';
+
 import './Kanban.css';
 
 const KanbanBoard: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
+  const [groupId, setGroupId] = useState<string>('');
+  console.log(groupId);
+  
   const [columns, setColumns] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
@@ -20,6 +25,8 @@ const KanbanBoard: React.FC = () => {
 
   // Filtros
   const [searchTitle, setSearchTitle] = useState('');
+  const [assigneeFilter, setAssigneeFilter] = useState('');
+  const [showReport, setShowReport] = useState(false);
 
   const fetchBoardData = async () => {
     if (!boardId) return;
@@ -33,6 +40,10 @@ const KanbanBoard: React.FC = () => {
       setColumns(colsRes?.data || colsRes || []);
       setCards(cardsRes?.data || cardsRes || []);
       
+      const bData = boardRes?.data || boardRes;
+      if (bData?.groupId) setGroupId(bData.groupId);
+      else if (bData?.group?._id) setGroupId(bData.group._id);
+
       if (boardRes?.group?.members) {
         setMembers(boardRes.group.members);
       } else if (boardRes?.data?.group?.members) {
@@ -49,26 +60,36 @@ const KanbanBoard: React.FC = () => {
 
   const handleCreateColumn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!boardId || !newColumnName) return;
+    if (!newColumnName) return;
     try {
-      await createColumn({ name: newColumnName, boardId });
+      await createColumn({ name: newColumnName, boardId: boardId! });
       setNewColumnName('');
       fetchBoardData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear la columna');
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleCreateCard = async (e: React.FormEvent, columnId: string) => {
     e.preventDefault();
-    if (!boardId || !newCardTitle) return;
+    if (!newCardTitle) return;
     try {
-      await createCard({ title: newCardTitle, boardId, columnId });
+      await createCard({ title: newCardTitle, columnId });
       setNewCardTitle('');
       setActiveColumnId(null);
       fetchBoardData();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleUpdateCardDetails = async (cardId: string, data: any) => {
+    try {
+      await updateCard(cardId, data);
+      setEditingCard(null);
+      fetchBoardData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear la tarjeta');
+      alert(error.response?.data?.message || 'Error al actualizar la tarjeta');
     }
   };
 
@@ -117,24 +138,45 @@ const KanbanBoard: React.FC = () => {
   };
 
   return (
-    <div className="kanban-wrapper">
-      <header className="kanban-header">
+    <div className="kanban-wrapper" style={{ padding: '0', display: 'flex', flexDirection: 'column' }}>
+      
+      <div style={{ padding: '0 20px 20px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <header className="kanban-header">
         <h1>Tablero Kanban</h1>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <input 
-            type="text" 
-            placeholder="Buscar tarjetas..." 
-            value={searchTitle}
-            onChange={(e) => setSearchTitle(e.target.value)}
-            className="search-input"
-            style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
-          <Link to="/dashboard" className="btn-secondary">Volver al Dashboard</Link>
+          <div className="filters" style={{ display: 'flex', gap: '10px' }}>
+            <input 
+              type="text" 
+              placeholder="Buscar tarjetas..." 
+              value={searchTitle}
+              onChange={(e) => setSearchTitle(e.target.value)}
+              className="search-input"
+              style={{ padding: '0.5rem 1rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', outline: 'none' }}
+            />
+            <select 
+              value={assigneeFilter} 
+              onChange={(e) => setAssigneeFilter(e.target.value)}
+              style={{ padding: '0.5rem 1rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#b6c2cf', outline: 'none' }}
+            >
+              <option value="" style={{ color: '#000' }}>Todos los asignados</option>
+              {members.map(m => (
+                <option key={m.user?._id || m.user} value={m.user?._id || m.user} style={{ color: '#000' }}>
+                  {m.user?.name || m.user?.email || 'Miembro'}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn-secondary" style={{ borderRadius: '20px' }} onClick={() => setShowReport(true)}>
+              <i className="fas fa-file-alt" style={{ marginRight: '8px' }}></i> Reporte
+            </button>
+            <Link to="/dashboard" className="btn-secondary" style={{ borderRadius: '20px' }}>Volver</Link>
+          </div>
         </div>
       </header>
 
       <div className="add-column-bar">
-        <form onSubmit={handleCreateColumn}>
+        <form onSubmit={handleCreateColumn} style={{ display: 'flex', gap: '10px' }}>
           <input 
             type="text" 
             placeholder="Nueva Columna" 
@@ -148,7 +190,11 @@ const KanbanBoard: React.FC = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="kanban-board">
           {columns.map(col => {
-            const columnCards = cards.filter(c => c.columnId === col._id || c.columnId === col.id);
+            const columnCards = cards
+              .filter(c => c.columnId === col._id || c.columnId === col.id)
+              .filter(c => searchTitle ? c.title.toLowerCase().includes(searchTitle.toLowerCase()) : true)
+              .filter(c => assigneeFilter ? c.assignedTo === assigneeFilter : true);
+            
             return (
               <div key={col._id} className="kanban-column">
                 <div className="column-header">
@@ -254,6 +300,17 @@ const KanbanBoard: React.FC = () => {
           onSave={handleUpdateCardDetails} 
         />
       )}
+
+      {showReport && (
+        <ReportModal 
+          boardName="Kanban Board"
+          columns={columns}
+          cards={cards}
+          members={members}
+          onClose={() => setShowReport(false)}
+        />
+      )}
+      </div>
     </div>
   );
 };

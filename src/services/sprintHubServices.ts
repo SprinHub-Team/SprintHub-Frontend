@@ -27,6 +27,11 @@ export const getMyGroups = async () => {
   return data;
 };
 
+export const getGroupById = async (groupId: string) => {
+  const { data } = await api.get(`/groups/${groupId}`);
+  return data;
+};
+
 export const addMemberToGroup = async (groupId: string, email: string, role: string) => {
   const { data } = await api.post(`/groups/${groupId}/members`, { email, role });
   return data;
@@ -105,6 +110,20 @@ export const deleteCard = async (cardId: string) => {
   return data;
 };
 
+export const uploadAttachment = async (cardId: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post(`/cards/${cardId}/attachments`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return data;
+};
+
+export const removeAttachment = async (cardId: string, attachmentId: string) => {
+  const { data } = await api.delete(`/cards/${cardId}/attachments/${attachmentId}`);
+  return data;
+};
+
 // --- COMENTARIOS ---
 export const createComment = async (commentData: { name: string, description: string, cardId: string, createdFor?: string }) => {
   const { data } = await api.post('/comments', commentData);
@@ -123,5 +142,70 @@ export const deleteComment = async (commentId: string) => {
 
 export const getUserProfile = async () => {
   const { data } = await api.get('/users/me');
+  return data;
+};
+
+// --- REPORTES ---
+export const getGroupPerformanceReport = async (groupId: string) => {
+  const { data } = await api.get(`/reports/groups/${groupId}`);
+  return data;
+};
+
+export const getUserPerformanceReport = async (userId: string, startDate?: string, endDate?: string) => {
+  const { data } = await api.get(`/reports/users/${userId}`, {
+    params: { startDate, endDate }
+  });
+  return data;
+};
+
+export const getCompletedActivitiesReport = async (groupId: string) => {
+  const { data } = await api.get(`/reports/groups/${groupId}/completed`);
+  return data;
+};
+
+// --- BACKLOG (CardPB) ---
+export const getBacklog = async (groupId: string, search?: string, assignedTo?: string) => {
+  const { data } = await api.get('/cardPB/group/' + groupId, { params: { search, assignedTo } });
+  return data;
+};
+
+export const createBacklogCard = async (payload: any) => {
+  const { data } = await api.post('/cardPB', payload);
+  return data;
+};
+
+export const deleteBacklogCard = async (id: string) => {
+  const { data } = await api.delete('/cardPB/' + id);
+  return data;
+};
+
+export const exportBacklogCsv = async (groupId: string) => {
+  const { data } = await api.get('/cardPB/group/' + groupId + '/export-csv', { responseType: 'blob' });
+  return data;
+};
+
+// --- SPRINTS ---
+export const getSprints = async (groupId: string) => {
+  const { data } = await api.get('/sprints/group/' + groupId);
+  return data;
+};
+
+export const createSprint = async (payload: any) => {
+  const { data } = await api.post('/sprints', payload);
+  return data;
+};
+
+export const moveCardToSprint = async (cardId: string, sprintId: string | null) => {
+  const { data } = await api.put('/sprints/cards/' + cardId + '/move', { sprintId });
+  return data;
+};
+
+export const getSprintCards = async (sprintId: string) => {
+  const { data } = await api.get('/sprints/' + sprintId + '/cards');
+  return data;
+};
+
+export const exportCardToBoard = async (cardId: string, columnId: string) => {
+  const { data } = await api.post('/sprints/cards/' + cardId + '/export', { columnId });
   return data;
 };
