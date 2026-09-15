@@ -74,6 +74,51 @@ const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClo
     }
   };
 
+  // Comments state
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+
+  const fetchComments = async () => {
+    try {
+      const res = await getCommentsByCard(card._id);
+      setComments(res.data || res || []);
+    } catch (error) {
+      console.error('Error fetching comments', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchComments();
+  }, [card._id]);
+
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !user) return;
+    try {
+      await createComment({
+        name: user.name,
+        description: newComment,
+        cardId: card._id,
+        createdFor: user.id || (user as any)._id,
+      });
+      setNewComment('');
+      fetchComments();
+    } catch (error) {
+      console.error('Error creating comment', error);
+      alert('Error al crear comentario');
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!window.confirm('¿Seguro que deseas borrar este comentario?')) return;
+    try {
+      await deleteComment(commentId);
+      fetchComments();
+    } catch (error) {
+      console.error('Error deleting comment', error);
+      alert('Error al eliminar comentario');
+    }
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(card._id, {
