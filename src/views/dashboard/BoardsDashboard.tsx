@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getBoards, createBoard, removeBoard } from '../../services/sprintHubServices';
+import { getBoards, removeBoard, createBoard, getTemplates } from '../../services/sprintHubServices';
 
 import './Dashboard.css';
 
@@ -10,6 +13,8 @@ const BoardsDashboard: React.FC = () => {
   const [boards, setBoards] = useState<any[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [templateId, setTemplateId] = useState('');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -24,17 +29,28 @@ const BoardsDashboard: React.FC = () => {
     }
   };
 
+  const fetchTemplates = async () => {
+    try {
+      const res = await getTemplates();
+      setTemplates(res || []);
+    } catch (error) {
+      console.error('Error fetching templates', error);
+    }
+  };
+
   useEffect(() => {
     fetchBoards();
+    fetchTemplates();
   }, [groupId]);
 
   const handleCreateBoard = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupId) return;
     try {
-      await createBoard({ title, description, groupId });
+      await createBoard({ title, description, groupId, templateId: templateId || undefined });
       setTitle('');
       setDescription('');
+      setTemplateId('');
       setShowCreateModal(false);
       fetchBoards();
     } catch (error: any) {
@@ -113,6 +129,19 @@ const BoardsDashboard: React.FC = () => {
                   rows={3}
                   style={{ width: '100%', padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', resize: 'none' }}
                 />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#9fadbc', fontSize: '0.9rem' }}>Plantilla (Opcional)</label>
+                <select 
+                  value={templateId} 
+                  onChange={(e) => setTemplateId(e.target.value)}
+                  style={{ width: '100%', padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                >
+                  <option value="">Ninguna (Básica)</option>
+                  {templates.map(t => (
+                    <option key={t.id} value={t.id}>{t.name} - {t.description.substring(0, 50)}...</option>
+                  ))}
+                </select>
               </div>
               <div className="modal-actions" style={{ marginTop: '10px' }}>
                 <button type="button" onClick={() => setShowCreateModal(false)}>Cancelar</button>

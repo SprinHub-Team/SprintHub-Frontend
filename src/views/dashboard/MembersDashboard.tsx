@@ -11,6 +11,8 @@ const MembersDashboard: React.FC = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'collaborator' | 'visitor'>('collaborator');
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [inviting, setInviting] = useState(false);
   const user = useAuthStore(state => state.user);
 
@@ -26,6 +28,7 @@ const MembersDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchGroup();
+    api.get('/users').then(res => setUsersList(res.data)).catch(console.error);
   }, [groupId]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
@@ -178,18 +181,39 @@ const MembersDashboard: React.FC = () => {
             </div>
 
             <form onSubmit={handleInvite} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
+              <div style={{ position: 'relative' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#9fadbc', fontSize: '0.9rem' }}>
-                  Correo Electrónico del Usuario
+                  Buscar usuario (Nombre o Correo)
                 </label>
                 <input 
-                  type="email"
+                  type="text"
                   value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="ejemplo@correo.com"
+                  onChange={(e) => { setInviteEmail(e.target.value); setShowUserDropdown(true); }}
+                  onFocus={() => setShowUserDropdown(true)}
+                  placeholder="Ej: Jhonatan..."
                   required
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
                 />
+                {showUserDropdown && inviteEmail.length > 0 && (
+                  <div className="glass-panel" style={{ position: 'absolute', top: '100%', left: 0, right: 0, maxHeight: '200px', overflowY: 'auto', zIndex: 100, borderRadius: '8px', marginTop: '5px' }}>
+                    {usersList.filter(u => u.name.toLowerCase().includes(inviteEmail.toLowerCase()) || u.email.toLowerCase().includes(inviteEmail.toLowerCase())).map(u => (
+                      <div 
+                        key={u._id} 
+                        style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                        onClick={() => { setInviteEmail(u.email); setShowUserDropdown(false); }}
+                        className="dropdown-item"
+                      >
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                          {u.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '0.9rem', color: '#f8fafc', fontWeight: 600 }}>{u.name}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.email}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>

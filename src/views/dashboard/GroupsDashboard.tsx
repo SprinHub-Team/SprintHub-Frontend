@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getMyGroups, createGroup, deleteGroup, addMemberToGroup } from '../../services/sprintHubServices';
+import api from '../../services/api';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,6 +13,9 @@ const GroupsDashboard: React.FC = () => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [emailToAdd, setEmailToAdd] = useState('');
   const [roleToAdd, setRoleToAdd] = useState('collaborator');
+
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   const user = useAuthStore(state => state.user);
   const navigate = useNavigate();
@@ -28,6 +32,7 @@ const GroupsDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchGroups();
+    api.get('/users').then(res => setUsersList(res.data)).catch(console.error);
   }, []);
 
   const handleCreateGroup = async (e: React.FormEvent) => {
@@ -187,9 +192,37 @@ const GroupsDashboard: React.FC = () => {
               <button onClick={() => setSelectedGroupId(null)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.2rem', cursor: 'pointer' }}>&times;</button>
             </div>
             <form onSubmit={handleAddMember} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#9fadbc', fontSize: '0.9rem' }}>Correo electrónico</label>
-                <input type="email" placeholder="usuario@correo.com" value={emailToAdd} onChange={(e) => setEmailToAdd(e.target.value)} required style={{ width: '100%', padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff' }} />
+              <div style={{ position: 'relative' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#9fadbc', fontSize: '0.9rem' }}>Buscar usuario (Nombre o Correo)</label>
+                <input 
+                  type="text" 
+                  placeholder="Ej: jhonatan..." 
+                  value={emailToAdd} 
+                  onChange={(e) => { setEmailToAdd(e.target.value); setShowUserDropdown(true); }} 
+                  onFocus={() => setShowUserDropdown(true)}
+                  required 
+                  style={{ width: '100%', padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff' }} 
+                />
+                {showUserDropdown && emailToAdd.length > 0 && (
+                  <div className="glass-panel" style={{ position: 'absolute', top: '100%', left: 0, right: 0, maxHeight: '200px', overflowY: 'auto', zIndex: 100, borderRadius: '8px', marginTop: '5px' }}>
+                    {usersList.filter(u => u.name.toLowerCase().includes(emailToAdd.toLowerCase()) || u.email.toLowerCase().includes(emailToAdd.toLowerCase())).map(u => (
+                      <div 
+                        key={u._id} 
+                        style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                        onClick={() => { setEmailToAdd(u.email); setShowUserDropdown(false); }}
+                        className="dropdown-item"
+                      >
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                          {u.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '0.9rem', color: '#f8fafc', fontWeight: 600 }}>{u.name}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.email}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#9fadbc', fontSize: '0.9rem' }}>Rol</label>

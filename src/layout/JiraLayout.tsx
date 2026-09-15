@@ -5,6 +5,7 @@ import { getBoardById, getMyGroups } from '../services/sprintHubServices';
 import BoardSwitcher from './BoardSwitcher';
 import BoardSettingsModal from '../views/board/BoardSettingsModal';
 import ProfileSettingsModal from '../views/auth/ProfileSettingsModal';
+import { GroupSettingsModal } from '../components/GroupSettingsModal';
 import './JiraLayout.css';
 
 interface JiraLayoutProps {
@@ -20,7 +21,9 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
   const [boardData, setBoardData] = useState<any>(null);
   
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showAppSwitcher, setShowAppSwitcher] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [settingsGroupId, setSettingsGroupId] = useState<string | null>(null);
 
   const [groups, setGroups] = useState<any[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
@@ -61,12 +64,50 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
       {/* Modern Top Navbar */}
       <nav className="modern-topbar">
         <div className="topbar-left">
-          <div className="app-switcher-icon pulse-hover">
-            <div className="dot-grid">
-              <span/><span/><span/>
-              <span/><span/><span/>
-              <span/><span/><span/>
+          <div style={{ position: 'relative' }}>
+            <div className="app-switcher-icon pulse-hover" onClick={() => setShowAppSwitcher(!showAppSwitcher)}>
+              <div className="dot-grid">
+                <span/><span/><span/>
+                <span/><span/><span/>
+                <span/><span/><span/>
+              </div>
             </div>
+            {showAppSwitcher && (
+              <div className="profile-dropdown glass-panel" style={{ left: 0, right: 'auto', width: '300px', padding: '20px', zIndex: 9999, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
+                <div style={{ marginBottom: '15px', color: '#f8fafc', fontWeight: 600, fontSize: '1.1rem' }}>
+                  Tus aplicaciones
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                  <Link to="/dashboard" onClick={() => setShowAppSwitcher(false)} className="app-switcher-item pulse-hover" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textDecoration: 'none', color: '#cbd5e1', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ background: 'rgba(59, 130, 246, 0.2)', padding: '12px', borderRadius: '50%', marginBottom: '10px' }}>
+                      <i className="fas fa-project-diagram" style={{ color: '#60a5fa', fontSize: '1.5rem' }}></i>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>SprintHub</span>
+                  </Link>
+
+                  <Link to="/templates" onClick={() => setShowAppSwitcher(false)} className="app-switcher-item pulse-hover" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textDecoration: 'none', color: '#cbd5e1', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '12px', borderRadius: '50%', marginBottom: '10px' }}>
+                      <i className="fas fa-copy" style={{ color: '#34d399', fontSize: '1.5rem' }}></i>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Plantillas</span>
+                  </Link>
+                  
+                  <Link to="/teams" onClick={() => setShowAppSwitcher(false)} className="app-switcher-item pulse-hover" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textDecoration: 'none', color: '#cbd5e1', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ background: 'rgba(245, 158, 11, 0.2)', padding: '12px', borderRadius: '50%', marginBottom: '10px' }}>
+                      <i className="fas fa-users" style={{ color: '#fbbf24', fontSize: '1.5rem' }}></i>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Equipos</span>
+                  </Link>
+                  
+                  <Link to="/projects" onClick={() => setShowAppSwitcher(false)} className="app-switcher-item pulse-hover" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textDecoration: 'none', color: '#cbd5e1', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.2)', padding: '12px', borderRadius: '50%', marginBottom: '10px' }}>
+                      <i className="fas fa-chart-pie" style={{ color: '#c4b5fd', fontSize: '1.5rem' }}></i>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Proyectos</span>
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
           <div className="brand-logo pulse-hover">
             <div className="logo-icon-modern">
@@ -77,9 +118,9 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
           
           <div className="topbar-links">
             <Link to="/dashboard" className="glass-link" style={{textDecoration:'none', color:'inherit'}}>Dashboard</Link>
-            <Link to="/wip" className="glass-link" style={{textDecoration:'none', color:'inherit'}}>Proyectos</Link>
-            <Link to="/wip" className="glass-link" style={{textDecoration:'none', color:'inherit'}}>Equipos</Link>
-            <Link to="/wip" className="create-btn-modern" style={{textDecoration:'none', display: 'flex', alignItems: 'center', gap: '8px'}}><i className="fas fa-plus"></i> Nuevo</Link>
+            <Link to="/projects" className="glass-link" style={{textDecoration:'none', color:'inherit'}}>Proyectos</Link>
+            <Link to="/teams" className="glass-link" style={{textDecoration:'none', color:'inherit'}}>Equipos</Link>
+            <Link to="/dashboard" className="create-btn-modern" style={{textDecoration:'none', display: 'flex', alignItems: 'center', gap: '8px'}}><i className="fas fa-plus"></i> Nuevo</Link>
           </div>
         </div>
 
@@ -124,7 +165,7 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
             <Link to="/dashboard" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
               <i className="fas fa-columns"></i> Tableros
             </Link>
-            <Link to="/wip" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
+            <Link to="/templates" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
               <i className="fas fa-copy"></i> Plantillas
             </Link>
             <Link to="/dashboard" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
@@ -179,9 +220,13 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
                       </>
                     )}
                     
-                    <Link to="/wip" className="sidebar-item" style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
+                    <div 
+                      onClick={() => setSettingsGroupId(g._id)} 
+                      className="sidebar-item" 
+                      style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto', cursor: 'pointer' }}
+                    >
                       <i className="fas fa-cog" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Configuración
-                    </Link>
+                    </div>
                   </div>
                 )}
               </div>
@@ -209,12 +254,25 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
                   <div className="pulse-circle"></div>
                   <i className="fas fa-rocket"></i>
                 </div>
-                <h1>SprintHub Workspace</h1>
+                <h1>
+                  {(() => {
+                    const gMatch = location.pathname.match(/\/groups\/([a-zA-Z0-9_]+)/);
+                    const bMatch = location.pathname.match(/\/board\/([a-zA-Z0-9_]+)/);
+                    let cId = gMatch ? gMatch[1] : (bMatch ? localStorage.getItem('currentGroupId') : null);
+                    const cg = groups.find(g => g._id === cId);
+                    return cg ? cg.name : 'SprintHub Workspace';
+                  })()}
+                </h1>
               </div>
               <div className="header-actions">
                 <button className="icon-btn tooltip" data-tooltip="Invitar equipo"><i className="fas fa-user-plus"></i></button>
                 <button className="icon-btn tooltip" data-tooltip="Estadísticas"><i className="fas fa-chart-pie"></i></button>
-                <button className="icon-btn tooltip" data-tooltip="Configuración"><i className="fas fa-cog"></i></button>
+                <button className="icon-btn tooltip" data-tooltip="Configuración del Espacio" onClick={() => {
+                  const gMatch = location.pathname.match(/\/groups\/([a-zA-Z0-9_]+)/);
+                  const bMatch = location.pathname.match(/\/board\/([a-zA-Z0-9_]+)/);
+                  let cId = gMatch ? gMatch[1] : (bMatch ? localStorage.getItem('currentGroupId') : null);
+                  if(cId) setSettingsGroupId(cId);
+                }}><i className="fas fa-cog"></i></button>
               </div>
             </div>
             
@@ -341,6 +399,17 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
       
       {showProfileModal && (
         <ProfileSettingsModal onClose={() => setShowProfileModal(false)} />
+      )}
+      
+      {settingsGroupId && (
+        <GroupSettingsModal 
+          group={groups.find(g => g._id === settingsGroupId) || {}}
+          onClose={() => setSettingsGroupId(null)}
+          onUpdate={() => {
+            getMyGroups().then(res => setGroups(res.data || res || []));
+            window.location.reload();
+          }}
+        />
       )}
     </div>
   );
