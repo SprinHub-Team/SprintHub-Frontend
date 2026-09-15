@@ -4,12 +4,23 @@ import { ApiError } from './ApiError';
 export function toApiError(error: unknown): ApiError {
     if (axios.isAxiosError(error)) {
         const status = error.response?.status;
+        const data = error.response?.data as
+            | {
+                  message?: string;
+                  errors?: string | undefined;
+              }
+            | undefined;
 
         const message =
-            error.response?.data?.message ??
+            data?.message ??
             'Ocurrió un error al comunicarse con el servidor.';
 
-        return new ApiError(message, status);
+        return new ApiError(
+            message,
+            status,
+            undefined,
+            data?.errors,
+        );
     }
 
     if (error instanceof Error) {
