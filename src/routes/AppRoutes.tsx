@@ -10,6 +10,8 @@ import ReportDashboard from '../views/dashboard/ReportDashboard';
 import BacklogDashboard from '../views/board/BacklogDashboard';
 import MembersDashboard from '../views/dashboard/MembersDashboard';
 import ProjectDocuments from '../views/dashboard/ProjectDocuments';
+import TemplatesDashboard from '../views/dashboard/TemplatesDashboard';
+import ProjectsDashboard from '../views/dashboard/ProjectsDashboard';
 import WorkInProgress from '../views/board/WorkInProgress';
 import JiraLayout from '../layout/JiraLayout';
 import { useAuthStore } from '../store/useAuthStore';
@@ -43,6 +45,9 @@ export const AppRoutes: React.FC = () => {
       <Route path="/board/:boardId/list" element={<ProtectedRoute><WorkInProgress title="Lista" icon="fas fa-stream" /></ProtectedRoute>} />
       <Route path="/board/:boardId/timeline" element={<ProtectedRoute><WorkInProgress title="Cronograma" icon="fas fa-calendar-alt" /></ProtectedRoute>} />
       <Route path="/board/:boardId/automations" element={<ProtectedRoute><WorkInProgress title="Automatizaciones" icon="fas fa-bolt" /></ProtectedRoute>} />
+      <Route path="/templates" element={<ProtectedRoute><TemplatesDashboard /></ProtectedRoute>} />
+      <Route path="/projects" element={<ProtectedRoute><ProjectsDashboard /></ProtectedRoute>} />
+      <Route path="/teams" element={<ProtectedRoute><GroupsDashboard /></ProtectedRoute>} />
       <Route path="/wip" element={<ProtectedRoute><WorkInProgress title="Módulo" icon="fas fa-tools" /></ProtectedRoute>} />
     </Routes>
   );

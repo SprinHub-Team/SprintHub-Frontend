@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from './api';
 
 // --- AUTENTICACIÓN ---
@@ -53,7 +54,7 @@ export const getBoardById = async (boardId: string) => {
   return data;
 };
 
-export const createBoard = async (payload: { title: string, description?: string, groupId: string, columnsIds?: string[] }) => {
+export const createBoard = async (payload: { title: string, description?: string, groupId: string, columnsIds?: string[], templateId?: string }) => {
   const { data } = await api.post('/boards', payload);
   return data;
 };
@@ -207,5 +208,15 @@ export const getSprintCards = async (sprintId: string) => {
 
 export const exportCardToBoard = async (cardId: string, columnId: string) => {
   const { data } = await api.post('/sprints/cards/' + cardId + '/export', { columnId });
+  return data;
+};
+
+export const getTemplates = async () => {
+  const { data } = await api.get('/templates');
+  return data;
+};
+
+export const applyTemplateToBoard = async (boardId: string, templateId: string) => {
+  const { data } = await api.post(`/boards/${boardId}/apply-template`, { templateId });
   return data;
 };
