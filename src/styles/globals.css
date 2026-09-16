@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@import "./tokens.css";
+
+* {
+    box-sizing: border-box;
+}
 
 html,
 body,
@@ -8,4 +13,50 @@ body,
 
 body {
     margin: 0;
+    background: var(--bg);
+    color: var(--text);
+
+    font-family:
+        'Inter',
+        'Manrope',
+        'Plus Jakarta Sans',
+        system-ui,
+        sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+::selection {
+    background: var(--secondary);
+    color: var(--on-gradient);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
 }

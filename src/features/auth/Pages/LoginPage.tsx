@@ -3,6 +3,10 @@ import { useLogin } from "../hooks/useLogin";
 import { loginSchema, type LoginFormData } from "../types/auth.schema";
 import { useState } from "react";
 import { ApiError } from "@/services/api/errors/ApiError";
+import AuthFormLayout from "../components/AuthFormLayout";
+import Alert from "@/components/common/ui/Alert";
+import Input from "@/components/common/ui/Input";
+import Button from "@/components/common/ui/Button";
 
 
 function LoginPage(){
@@ -23,13 +27,15 @@ function LoginPage(){
 
     const[generalError, setGeneralError]= useState<string | null>(null);
 
+    const registrationMessage = typeof location.state?.message === 'string' ? location.state.message : null;
+
     function handleChange(field: keyof LoginFormData, value: string){
         
-        setFormData(previous=> ({
+        setFormData(previous => ({
             ...previous, [field]: value
         }));
 
-        setErrors(previous=>({
+        setErrors(previous =>({
             ...previous, [field]: undefined
         }));
 
@@ -41,12 +47,13 @@ function LoginPage(){
 
         event.preventDefault();
 
-        setGeneralError(null);
         setErrors({});
+        setGeneralError(null);
 
         const validation = loginSchema.safeParse(formData);
 
         if(!validation.success){
+
             const fieldErrors: Partial<Record<keyof LoginFormData, string>>={};
 
             for(const issue of validation.error.issues){
@@ -71,6 +78,7 @@ function LoginPage(){
             const from = location.state?.from;
 
             if(from && typeof from.pathname === 'string'){
+
                 navigate(`${from.pathname}${from.search ?? ''}${from.hash ?? ''}`,
                 {replace: true});
 
@@ -82,8 +90,8 @@ function LoginPage(){
         }catch(error: unknown){
 
             if(error instanceof ApiError){
-                setGeneralError(error.message);
 
+                setGeneralError(error.message);
                 return;
             }
 
@@ -93,95 +101,75 @@ function LoginPage(){
     }
 
     return (
-      <main className="flex min-h-screen items-center justify-center b-gray-100 px-4">
-        <section className="w-full max-w-md rounded-lg bg-white p-8 shadow">
-          <div className="mb-8">
-            <h1 className="text-2x1 font-bold text-gray-900">
-                Iniciar sesión
-            </h1>
-
-            <p className="mt-2 text-sm text-gray-600">
-              Ingresa a tu cuenta de SprintHub.
-            </p>
-          </div>
-
-           {generalError &&(
-            <div
-             role="alert"
-             className="mb-5 rounded-mb border border-red-200 bg-red-50 p-3 text-red-700">
-                {generalError}
-             </div>
-           )}
-
-           <form 
-              onSubmit={handleSubmit}
-              className="space-y-5"
-              noValidate
+        <AuthFormLayout
+            title="Iniciar sesión"
+            description="Ingresa a tu cuenta de SprintHub."
+            footer={
+                <>
+                  ¿No tienes una cuenta?{' '}
+                    <Link
+                        to="/register"
+                        className="font-medium text text-[var(--secondary)] hover:underline">
+                            Registrarse
+                    </Link>
+                </>
+            }
             >
-                <div>
-                    <label
-                     htmlFor="email"
-                     className="mb-1 block text-sm font-medium text-gray-700">
-                        Correo Electronico
-                    </label>
-
-                    <input
-                     id="email"
-                     type="email"
-                     value={formData.email}
-                     onChange={event=> handleChange('email', event?.target.value)}
-                     disabled={isLoading}
-                     className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-gray-500" />
-
-                    {errors.email && (
-                        <p className="mt-1 text-sm text-red-600">
-                            {errors.email}
-                        </p>
+                <div className="space-y-5">
+                    {registrationMessage &&(
+                        <Alert variant="danger">
+                            {generalError}
+                        </Alert>
                     )}
+
+                    <form 
+                        onSubmit={handleSubmit}
+                        className="space-y-5"
+                        noValidate
+                    >
+                        <Input
+                            id="email"
+                            type="email"
+                            label="Correo electrónico"
+                            placeholder="correo@ejemplo.com"
+                            value={formData.email}
+                            onChange={event =>
+                                handleChange(
+                                    'email',
+                                    event.target.value
+                                )
+                            }
+                            error={errors.email}
+                            disabled={isLoading}
+                        />
+
+                        <Input
+                            id="password"
+                            type="password"
+                            label="Contraseña"
+                            placeholder="*********"
+                            value={formData.password}
+                            onChange={event =>
+                                handleChange(
+                                    'password',
+                                    event.target.value
+                                )
+                            }
+                            error={errors.password}
+                            disabled={isLoading}
+                        />
+
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            isLoading={isLoading}
+                        >
+                            Iniciar sesión
+                        </Button>
+                    </form>
                 </div>
-
-                <div>
-                    <label
-                        htmlFor="password"
-                        className="mb-1 block text-sm font-medium text-gray-700">
-                            Contraseña
-                    </label>
-
-                    <input
-                        id="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={event => handleChange('password', event.target.value)}
-                        disabled={isLoading}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-gray-500" />
-
-                    {errors.password && (
-                        <p className="mt-1 text-sm text-red-600">
-                            {errors.password}
-                        </p>
-                    )}
-                </div>
-
-                <button 
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50">
-                        {isLoading ? 'Iniciando sesión...': 'Iniciar sesión'}
-                </button>
-            </form>
-
-            <p className="mt-6 text-center text-sm text-gray-600">
-                ¿No tienes una cuenta?{' '}
-                <Link
-                   to="/register"
-                   className="font-medium text-gray-900 underline">
-                     Registrarse
-                </Link>
-            </p>
-        </section>
-      </main>
+        </AuthFormLayout>
     );
-
 }
 
 export default LoginPage;
