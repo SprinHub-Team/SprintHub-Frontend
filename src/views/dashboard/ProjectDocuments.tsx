@@ -1,3 +1,4 @@
+import { showAlert } from '../../utils/alerts';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../services/api';
@@ -52,7 +53,7 @@ const ProjectDocuments: React.FC = () => {
       fetchDocsAndGroup();
       e.target.value = '';
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al subir el documento');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al subir el documento');
     } finally {
       setUploading(false);
     }
@@ -64,7 +65,7 @@ const ProjectDocuments: React.FC = () => {
       await api.delete(`/project-documents/${id}`);
       fetchDocsAndGroup();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al eliminar el documento');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al eliminar el documento');
     }
   };
 

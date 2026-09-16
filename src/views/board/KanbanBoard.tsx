@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, getBoardById, removeColumn } from '../../services/sprintHubServices';
+import { showAlert } from '../../utils/alerts';
 import EditCardModal from './EditCardModal';
 import ReportModal from './ReportModal';
 
@@ -89,7 +90,7 @@ const KanbanBoard: React.FC = () => {
       setEditingCard(null);
       fetchBoardData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al actualizar la tarjeta');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al actualizar la tarjeta');
     }
   };
 
@@ -109,7 +110,7 @@ const KanbanBoard: React.FC = () => {
       await updateCard(draggableId, { columnId: destination.droppableId });
       const destColumn = columns.find(c => c._id === destination.droppableId);
       if (destColumn && destColumn.name.toLowerCase().includes('finalizad')) {
-        alert('¡Tarea Completada! 🎉');
+        showAlert.success('¡Listo!', '¡Tarea Completada! 🎉');
       }
     } catch (error) {
       console.error('Error moviendo tarjeta', error);
@@ -195,7 +196,7 @@ const KanbanBoard: React.FC = () => {
                     <button 
                       onClick={() => {
                         if(window.confirm('¿Eliminar esta columna y todo su contenido?')) {
-                          removeColumn(col._id).then(fetchBoardData).catch(e => alert(e.response?.data?.message || 'Error'));
+                          removeColumn(col._id).then(fetchBoardData).catch(e => showAlert.error('Error', e.response?.data?.message || 'Error'));
                         }
                       }} 
                       style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}

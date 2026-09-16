@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { updateBoard, removeBoard, addMemberToGroup } from '../../services/sprintHubServices';
 import { useNavigate } from 'react-router-dom';
+import { showAlert } from '../../utils/alerts';
+import { DeleteButton } from '../../components/DeleteButton';
 
 interface BoardSettingsModalProps {
   board: any;
@@ -29,7 +31,7 @@ const BoardSettingsModal: React.FC<BoardSettingsModalProps> = ({ board, groupId,
       onUpdate();
       onClose();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al actualizar el tablero');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al actualizar el tablero');
     } finally {
       setLoading(false);
     }
@@ -42,7 +44,7 @@ const BoardSettingsModal: React.FC<BoardSettingsModalProps> = ({ board, groupId,
       await removeBoard(board._id);
       navigate(`/groups/${groupId}/boards`);
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al eliminar el tablero');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al eliminar el tablero');
     } finally {
       setLoading(false);
     }
@@ -54,11 +56,11 @@ const BoardSettingsModal: React.FC<BoardSettingsModalProps> = ({ board, groupId,
     try {
       setLoading(true);
       await addMemberToGroup(groupId, newMemberEmail, 'member');
-      alert(`Usuario ${newMemberEmail} agregado exitosamente.`);
+      showAlert.success('¡Listo!', `Usuario ${newMemberEmail} agregado exitosamente.`);
       setNewMemberEmail('');
       onUpdate(); // to refresh members if needed
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al agregar miembro');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al agregar miembro');
     } finally {
       setLoading(false);
     }
@@ -117,9 +119,7 @@ const BoardSettingsModal: React.FC<BoardSettingsModalProps> = ({ board, groupId,
             <h4 style={{ color: '#ef4444', margin: '0 0 5px 0' }}>Zona de Peligro</h4>
             <span style={{ fontSize: '0.85rem', color: '#9fadbc' }}>Esta acción no se puede deshacer.</span>
           </div>
-          <button onClick={handleDelete} className="btn-danger" disabled={loading} style={{ padding: '8px 16px', borderRadius: '8px' }}>
-            Eliminar Tablero
-          </button>
+          <DeleteButton onConfirm={handleDelete} disabled={loading} />
         </div>
       </div>
     </div>

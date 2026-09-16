@@ -1,3 +1,4 @@
+import { showAlert } from '../../utils/alerts';
 import React, { useState, useEffect } from 'react';
 import './Kanban.css'; 
 import { getCommentsByCard, createComment, deleteComment, uploadAttachment, removeAttachment } from '../../services/sprintHubServices';
@@ -59,7 +60,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClo
       fetchComments();
     } catch (error) {
       console.error('Error creating comment', error);
-      alert('Error al crear comentario');
+      showAlert.error('Aviso', 'Error al crear comentario');
     }
   };
 
@@ -70,7 +71,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClo
       fetchComments();
     } catch (error) {
       console.error('Error deleting comment', error);
-      alert('Error al eliminar comentario');
+      showAlert.error('Aviso', 'Error al eliminar comentario');
     }
   };
 
@@ -106,7 +107,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClo
       }
       e.target.value = ''; // Reset input
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al subir documento');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al subir documento');
     } finally {
       setUploading(false);
     }
@@ -120,7 +121,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({ card, members = [], onClo
         setAttachments(updatedCard.attachments);
       }
     } catch (error: any) {
-      alert('Error al eliminar el documento');
+      showAlert.error('Aviso', 'Error al eliminar el documento');
     }
   };
 

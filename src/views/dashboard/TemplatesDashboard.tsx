@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTemplates, getMyGroups, createBoard } from '../../services/sprintHubServices';
+import { showAlert } from '../../utils/alerts';
 
 const TemplatesDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const TemplatesDashboard: React.FC = () => {
       const boardId = newBoard.data?._id || newBoard._id;
       navigate('/board/' + boardId);
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear el tablero');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al crear el tablero');
     }
   };
 

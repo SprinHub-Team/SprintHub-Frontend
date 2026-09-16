@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getMyGroups, createGroup, deleteGroup, addMemberToGroup } from '../../services/sprintHubServices';
+import { getMyGroups, createGroup, addMemberToGroup } from '../../services/sprintHubServices';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
+import { showAlert } from '../../utils/alerts';
 
 const GroupsDashboard: React.FC = () => {
   const [groups, setGroups] = useState<any[]>([]);
@@ -42,20 +43,10 @@ const GroupsDashboard: React.FC = () => {
       setNewGroupName('');
       setNewGroupDesc('');
       setShowCreateModal(false);
-      alert('Espacio creado con éxito');
+      showAlert.success('¡Listo!', 'Espacio creado con éxito');
       fetchGroups();
     } catch (error) {
-      alert('Error al crear grupo');
-    }
-  };
-
-  const handleDeleteGroup = async (groupId: string) => {
-    if (!window.confirm('¿Seguro que deseas eliminar este grupo permanentemente?')) return;
-    try {
-      await deleteGroup(groupId);
-      fetchGroups();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al eliminar grupo');
+      showAlert.error('Aviso', 'Error al crear grupo');
     }
   };
 
@@ -67,9 +58,9 @@ const GroupsDashboard: React.FC = () => {
       setEmailToAdd('');
       setSelectedGroupId(null);
       fetchGroups();
-      alert('Miembro agregado con éxito');
+      showAlert.success('¡Listo!', 'Miembro agregado con éxito');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al agregar miembro');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al agregar miembro');
     }
   };
 
@@ -144,9 +135,6 @@ const GroupsDashboard: React.FC = () => {
                     <div style={{ position: 'relative', display: 'flex', gap: '10px' }}>
                       <button className="icon-btn tooltip" data-tooltip="Invitar miembro" onClick={() => setSelectedGroupId(group._id)} style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>
                         <i className="fas fa-user-plus"></i>
-                      </button>
-                      <button className="icon-btn tooltip" data-tooltip="Eliminar grupo" onClick={() => handleDeleteGroup(group._id)} style={{ border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>
-                        <i className="fas fa-trash"></i>
                       </button>
                     </div>
                   )}

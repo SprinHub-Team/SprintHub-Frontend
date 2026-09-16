@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getBoards, removeBoard, createBoard, getTemplates } from '../../services/sprintHubServices';
+import { DeleteButton } from '../../components/DeleteButton';
 
 import './Dashboard.css';
 
@@ -177,9 +178,7 @@ const BoardsDashboard: React.FC = () => {
                   Abrir Tablero
                 </button>
                 <div style={{ position: 'relative', display: 'flex', gap: '10px' }}>
-                  <button className="icon-btn tooltip" data-tooltip="Eliminar tablero" onClick={() => handleDeleteBoard(board._id)} style={{ border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>
-                    <i className="fas fa-trash"></i>
-                  </button>
+                  <DeleteButton size="small" onConfirm={() => handleDeleteBoard(board._id)} />
                 </div>
               </div>
             </div>

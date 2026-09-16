@@ -1,3 +1,4 @@
+import { showAlert } from '../../utils/alerts';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getGroupById, addMemberToGroup } from '../../services/sprintHubServices';
@@ -35,9 +36,9 @@ const MembersDashboard: React.FC = () => {
     try {
       await api.put(`/groups/${groupId}/members/${userId}`, { role: newRole });
       fetchGroup();
-      alert('Rol actualizado exitosamente');
+      showAlert.success('¡Listo!', 'Rol actualizado exitosamente');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al actualizar el rol');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al actualizar el rol');
     }
   };
 
@@ -46,9 +47,9 @@ const MembersDashboard: React.FC = () => {
     try {
       await api.delete(`/groups/${groupId}/members/${userId}`);
       fetchGroup();
-      alert('Miembro eliminado exitosamente');
+      showAlert.success('¡Listo!', 'Miembro eliminado exitosamente');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al eliminar el miembro');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al eliminar el miembro');
     }
   };
 
@@ -58,12 +59,12 @@ const MembersDashboard: React.FC = () => {
     try {
       setInviting(true);
       await addMemberToGroup(groupId, inviteEmail, inviteRole);
-      alert('Miembro agregado exitosamente');
+      showAlert.success('¡Listo!', 'Miembro agregado exitosamente');
       setInviteEmail('');
       setShowInviteModal(false);
       fetchGroup();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al invitar al miembro');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al invitar al miembro');
     } finally {
       setInviting(false);
     }

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { HookSidebar } from '../components/HookSidebar';
+import { NotificationBell } from '../components/NotificationBell';
 import { getBoardById, getMyGroups } from '../services/sprintHubServices';
 import BoardSwitcher from './BoardSwitcher';
 import BoardSettingsModal from '../views/board/BoardSettingsModal';
@@ -130,13 +132,17 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
             <input type="text" placeholder="Buscar en todo SprintHub..." />
             <div className="search-shortcut">⌘K</div>
           </div>
-          <div className="topbar-icons">
-            <Link to="/wip" className="icon-wrapper" style={{color:'inherit'}}><i className="far fa-bell"></i><span className="notification-dot"></span></Link>
+          <div className="topbar-icons" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <NotificationBell hasNotifications={true} onClick={() => console.log('Bell clicked')} />
             <Link to="/wip" className="icon-wrapper" style={{color:'inherit'}}><i className="far fa-question-circle"></i></Link>
           </div>
           <div style={{ position: 'relative' }}>
-            <div className="user-avatar-modern" onClick={() => setShowProfileMenu(!showProfileMenu)} title="Mi Perfil">
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
+            <div className="user-avatar-modern" onClick={() => setShowProfileMenu(!showProfileMenu)} title="Mi Perfil" style={{ overflow: 'hidden', padding: user?.profilePicture ? 0 : undefined }}>
+              {user?.profilePicture ? (
+                <img src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:4000'}${user.profilePicture}`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                user?.name?.charAt(0).toUpperCase() || 'U'
+              )}
             </div>
             {showProfileMenu && (
               <div className="profile-dropdown glass-panel">
@@ -189,8 +195,12 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
                   style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', paddingRight: '16px' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div className="project-icon" style={{ background: '#0052cc', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '10px' }}>
-                      {g.name.substring(0,2).toUpperCase()}
+                    <div className="project-icon" style={{ background: '#0052cc', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '10px', overflow: 'hidden' }}>
+                      {g.profilePicture ? (
+                        <img src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:4000'}${g.profilePicture}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        g.name.substring(0,2).toUpperCase()
+                      )}
                     </div>
                     <span style={{ marginLeft: '10px', fontSize: '0.9rem' }}>{g.name}</span>
                   </div>
@@ -199,34 +209,19 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
                 
                 {expandedGroups[g._id] && (
                   <div className="sidebar-group-children fade-down">
-                    <Link to={`/groups/${g._id}/boards`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/boards`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
-                      <i className="fas fa-columns" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Tableros
-                    </Link>
-                    
-                    <Link to={`/groups/${g._id}/members`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/members`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div><i className="fas fa-user-friends" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Miembros</div>
-                      <i className="fas fa-plus" style={{ fontSize: '0.7rem', opacity: 0.8 }} title="Invitar miembros"></i>
-                    </Link>
-
-                    {/* Solo mostrar Resumen y Backlog si el usuario está interactuando con un tablero, backlog o estas vistas */}
-                    {(location.pathname.includes('/board/') || location.pathname.includes('/backlog') || location.pathname.includes('/reports') || location.pathname.includes('/documents')) && (
-                      <>
-                        <Link to={`/groups/${g._id}/reports`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/reports`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
-                          <i className="fas fa-chart-pie" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Resumen
-                        </Link>
-                        <Link to={`/groups/${g._id}/backlog`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/backlog`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
-                          <i className="fas fa-list" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Backlog
-                        </Link>
-                      </>
-                    )}
-                    
-                    <div 
-                      onClick={() => setSettingsGroupId(g._id)} 
-                      className="sidebar-item" 
-                      style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto', cursor: 'pointer' }}
-                    >
-                      <i className="fas fa-cog" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Configuración
-                    </div>
+                    <HookSidebar
+                      items={[
+                        { id: 'tableros', label: 'Tableros', icon: <i className="fas fa-columns" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/boards` },
+                        { id: 'miembros', label: 'Miembros', icon: <i className="fas fa-user-friends" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/members` },
+                        { id: 'backlog', label: 'Backlog', icon: <i className="fas fa-list" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/backlog` },
+                        // Solo mostrar resumen si estamos interactuando en vistas profundas
+                        ...((location.pathname.includes('/board/') || location.pathname.includes('/reports') || location.pathname.includes('/documents')) 
+                          ? [{ id: 'resumen', label: 'Resumen', icon: <i className="fas fa-chart-pie" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/reports` }] 
+                          : []),
+                        { id: 'config', label: 'Configuración', icon: <i className="fas fa-cog" style={{ width: '20px' }}></i>, onClick: () => setSettingsGroupId(g._id) }
+                      ]}
+                      color="#3b82f6"
+                    />
                   </div>
                 )}
               </div>

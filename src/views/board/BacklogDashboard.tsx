@@ -1,3 +1,4 @@
+import { showAlert } from '../../utils/alerts';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { 
@@ -28,6 +29,11 @@ const BacklogDashboard: React.FC = () => {
   const [selectedBoardId, setSelectedBoardId] = useState('');
   const [columns, setColumns] = useState<any[]>([]);
   const [selectedColumnId, setSelectedColumnId] = useState('');
+  
+  // Move to Sprint State
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [selectedCardForMove, setSelectedCardForMove] = useState<string | null>(null);
+  const [selectedSprintId, setSelectedSprintId] = useState('');
 
   // Form States
   const [newCardTitle, setNewCardTitle] = useState('');
@@ -88,7 +94,7 @@ const BacklogDashboard: React.FC = () => {
       setShowCreateCard(false);
       fetchBacklog();
     } catch (error) {
-      alert('Error al crear actividad');
+      showAlert.error('Aviso', 'Error al crear actividad');
     }
   };
 
@@ -108,7 +114,7 @@ const BacklogDashboard: React.FC = () => {
       setShowCreateSprint(false);
       fetchSprints();
     } catch (error) {
-      alert('Error al crear sprint');
+      showAlert.error('Aviso', 'Error al crear sprint');
     }
   };
 
@@ -117,7 +123,7 @@ const BacklogDashboard: React.FC = () => {
       await moveCardToSprint(cardId, sprintId);
       loadData(); // reload all
     } catch (error) {
-      alert('Error al mover actividad');
+      showAlert.error('Aviso', 'Error al mover actividad');
     }
   };
 
@@ -133,7 +139,7 @@ const BacklogDashboard: React.FC = () => {
       link.click();
       link.remove();
     } catch (error) {
-      alert('Error al exportar CSV');
+      showAlert.error('Aviso', 'Error al exportar CSV');
     }
   };
 
@@ -176,9 +182,9 @@ const BacklogDashboard: React.FC = () => {
       setSelectedBoardId('');
       setSelectedColumnId('');
       loadData();
-      alert('Actividad exportada al tablero con éxito!');
+      showAlert.success('¡Listo!', 'Actividad exportada al tablero con éxito!');
     } catch (error) {
-      alert('Error al exportar');
+      showAlert.error('Aviso', (error as any).response?.data?.message || 'Error al exportar');
     }
   };
 
@@ -294,16 +300,13 @@ const BacklogDashboard: React.FC = () => {
                     <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{card.description || 'Sin descripción'}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <select 
-                      onChange={(e) => handleMoveCard(card._id, e.target.value)} 
-                      value=""
-                      style={{ padding: '6px 10px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.85rem' }}
+                    <button 
+                      onClick={() => { setSelectedCardForMove(card._id); setShowMoveModal(true); }} 
+                      className="btn-primary" 
+                      style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                     >
-                      <option value="" disabled>Mover a Sprint...</option>
-                      {sprints.map(s => (
-                        <option key={s._id} value={s._id}>{s.name}</option>
-                      ))}
-                    </select>
+                      <i className="fas fa-arrow-up"></i> Mover a Sprint
+                    </button>
                     <button onClick={() => deleteBacklogCard(card._id).then(loadData)} className="icon-btn tooltip" data-tooltip="Eliminar" style={{ border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.1)', color: '#ef4444', width: '32px', height: '32px' }}>
                       <i className="fas fa-trash"></i>
                     </button>
@@ -352,6 +355,38 @@ const BacklogDashboard: React.FC = () => {
                 <button type="submit" className="btn-primary">Añadir</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* MOVE TO SPRINT MODAL */}
+      {showMoveModal && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-panel" style={{ maxWidth: '400px' }}>
+            <h3>Mover a Sprint</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px' }}>Selecciona el sprint al que deseas enviar la actividad.</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div>
+                <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '5px' }}>Sprint Destino</label>
+                <select value={selectedSprintId} onChange={(e) => setSelectedSprintId(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <option value="" disabled>Selecciona un sprint...</option>
+                  {sprints.map(s => (
+                    <option key={s._id} value={s._id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-actions" style={{ marginTop: '20px' }}>
+                <button type="button" onClick={() => {setShowMoveModal(false); setSelectedSprintId(''); setSelectedCardForMove(null);}} className="btn-secondary">Cancelar</button>
+                <button type="button" onClick={() => {
+                  if (selectedCardForMove && selectedSprintId) {
+                    handleMoveCard(selectedCardForMove, selectedSprintId);
+                    setShowMoveModal(false);
+                    setSelectedSprintId('');
+                  }
+                }} disabled={!selectedSprintId} className="btn-primary" style={{ opacity: !selectedSprintId ? 0.5 : 1 }}>Mover</button>
+            </div>
           </div>
         </div>
       )}
