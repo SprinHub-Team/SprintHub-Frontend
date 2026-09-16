@@ -1,98 +1,41 @@
-import { useState, useRef } from 'react'; 
+import { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom'; 
 import api from '../services/api';  
-import { showAlert } from '../utils/alerts';
-import { DeleteButton } from './DeleteButton';
 
 export const GroupSettingsModal = ({ group, onClose, onUpdate }: any) => { 
   const [name, setName] = useState(group.name); 
   const [description, setDescription] = useState(group.description || ''); 
   const [visibility, setVisibility] = useState(group.visibility || 'private'); 
-  const [profilePicture, setProfilePicture] = useState(group.profilePicture || '');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
+  const [showDelete, setShowDelete] = useState(false); 
+  const [deleteConfirm, setDeleteConfirm] = useState(''); 
   const navigate = useNavigate(); 
-  const backendUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:4000';
-
-  const handleSave = async (e: any) => { 
-    e.preventDefault(); 
-    try { 
-      await api.put('/groups/' + group._id, { name, description, visibility }); 
-      await showAlert.success('¡Listo!', 'Espacio de trabajo actualizado con éxito'); 
-      onUpdate(); 
-      onClose(); 
-    } catch (err: any) { 
-      showAlert.error('Error', err.response?.data?.message || 'Error al actualizar el espacio'); 
-    } 
-  }; 
-
-  const handleDelete = async () => { 
-    try { 
-      await api.delete('/groups/' + group._id); 
-      await showAlert.success('Eliminado', 'Espacio eliminado definitivamente'); 
-      navigate('/dashboard'); 
-      window.location.reload(); 
-    } catch (err: any) { 
-      showAlert.error('Error', err.response?.data?.message || 'Error al eliminar'); 
-    } 
-  }; 
-
-  const handleImageChange = async (e: any) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const res = await api.post(`/groups/${group._id}/profile-picture`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      setProfilePicture(res.data.data.profilePicture);
-      showAlert.success('¡Excelente!', 'Foto de perfil actualizada');
-      onUpdate();
-    } catch (err: any) {
-      showAlert.error('Error', err.response?.data?.message || 'No se pudo subir la imagen');
-    }
-  };
+  const handleSave = async (e: any) => { e.preventDefault(); try { await api.put('/groups/' + group._id, { name, description, visibility }); alert('Espacio actualizado'); onUpdate(); onClose(); } catch (err: any) { alert(err.response?.data?.message || 'Error al actualizar'); } }; 
+  const handleDelete = async () => { if(deleteConfirm !== group.name) return alert('El nombre no coincide'); try { await api.delete('/groups/' + group._id); alert('Espacio eliminado'); navigate('/dashboard'); window.location.reload(); } catch (err: any) { alert(err.response?.data?.message || 'Error'); } }; 
   
   return ( 
     <div className="modal-overlay"> 
       <div className="modal-content glass-panel" style={{ maxWidth: '500px', width: '90%' }}> 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h3 style={{ margin: 0 }}>Configuración del Espacio</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', cursor: 'pointer' }}>&times;</button>
-        </div> 
-
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}> 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div 
-                style={{ 
-                  width: '64px', height: '64px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)'
-                }}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {profilePicture ? (
-                  <img src={`${backendUrl}${profilePicture}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <i className="fas fa-image" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.5rem' }}></i>
-                )}
-              </div>
-              <div>
-                <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>Cambiar logo</button>
-                <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" style={{ display: 'none' }} />
-              </div>
-            </div>
-
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}><h3 style={{ margin: 0 }}>Configuracion del Espacio</h3><button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', cursor: 'pointer' }}>&times;</button></div> 
+        {!showDelete ? ( 
+          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}> 
             <div><label style={{ display: 'block', marginBottom: '8px' }}>Nombre</label><input type="text" value={name} onChange={e => setName(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}/></div> 
-            <div><label style={{ display: 'block', marginBottom: '8px' }}>Descripción</label><textarea value={description} onChange={e => setDescription(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}/></div> 
-            <div><label style={{ display: 'block', marginBottom: '8px' }}>Visibilidad</label><select value={visibility} onChange={e => setVisibility(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#1d2125', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}><option value="private">Privado</option><option value="public">Público</option></select></div> 
+            <div><label style={{ display: 'block', marginBottom: '8px' }}>Descripcion</label><textarea value={description} onChange={e => setDescription(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}/></div> 
+            <div><label style={{ display: 'block', marginBottom: '8px' }}>Visibilidad</label><select value={visibility} onChange={e => setVisibility(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}><option value="private">Privado</option><option value="public">Publico</option></select></div> 
             <div className="modal-actions" style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}> 
-              <DeleteButton onConfirm={handleDelete} />
+              <button type="button" onClick={() => setShowDelete(true)} style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.4)', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer' }}>Eliminar Espacio</button> 
               <div style={{ display: 'flex', gap: '10px' }}><button type="button" onClick={onClose} style={{ padding: '10px 15px', borderRadius: '8px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer' }}>Cancelar</button><button type="submit" className="btn-primary" style={{ padding: '10px 15px', borderRadius: '8px' }}>Guardar Cambios</button></div> 
             </div> 
           </form> 
+        ) : ( 
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}> 
+            <p style={{ color: '#ef4444' }}>Esta accion no se puede deshacer. Por favor, escribe el nombre del espacio (<strong>{group.name}</strong>) para confirmar.</p> 
+            <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder={group.name} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}/> 
+            <div className="modal-actions" style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}> 
+              <button type="button" onClick={() => setShowDelete(false)} style={{ padding: '10px 15px', borderRadius: '8px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer' }}>Cancelar</button> 
+              <button type="button" onClick={handleDelete} disabled={deleteConfirm !== group.name} style={{ padding: '10px 15px', borderRadius: '8px', background: deleteConfirm === group.name ? '#ef4444' : '#7f1d1d', color: '#fff', border: 'none', cursor: deleteConfirm === group.name ? 'pointer' : 'not-allowed' }}>Eliminar Definitivamente</button> 
+            </div> 
+          </div> 
+        )} 
       </div> 
     </div> 
   ); 

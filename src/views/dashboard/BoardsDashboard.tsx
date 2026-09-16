@@ -4,7 +4,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getBoards, removeBoard, createBoard, getTemplates } from '../../services/sprintHubServices';
-import { DeleteButton } from '../../components/DeleteButton';
 
 import './Dashboard.css';
 

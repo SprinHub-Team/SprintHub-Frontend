@@ -209,19 +209,34 @@ const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
                 
                 {expandedGroups[g._id] && (
                   <div className="sidebar-group-children fade-down">
-                    <HookSidebar
-                      items={[
-                        { id: 'tableros', label: 'Tableros', icon: <i className="fas fa-columns" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/boards` },
-                        { id: 'miembros', label: 'Miembros', icon: <i className="fas fa-user-friends" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/members` },
-                        { id: 'backlog', label: 'Backlog', icon: <i className="fas fa-list" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/backlog` },
-                        // Solo mostrar resumen si estamos interactuando en vistas profundas
-                        ...((location.pathname.includes('/board/') || location.pathname.includes('/reports') || location.pathname.includes('/documents')) 
-                          ? [{ id: 'resumen', label: 'Resumen', icon: <i className="fas fa-chart-pie" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/reports` }] 
-                          : []),
-                        { id: 'config', label: 'Configuración', icon: <i className="fas fa-cog" style={{ width: '20px' }}></i>, onClick: () => setSettingsGroupId(g._id) }
-                      ]}
-                      color="#3b82f6"
-                    />
+                    <Link to={`/groups/${g._id}/boards`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/boards`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
+                      <i className="fas fa-columns" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Tableros
+                    </Link>
+                    
+                    <Link to={`/groups/${g._id}/members`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/members`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div><i className="fas fa-user-friends" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Miembros</div>
+                      <i className="fas fa-plus" style={{ fontSize: '0.7rem', opacity: 0.8 }} title="Invitar miembros"></i>
+                    </Link>
+
+                    {/* Solo mostrar Resumen y Backlog si el usuario está interactuando con un tablero, backlog o estas vistas */}
+                    {(location.pathname.includes('/board/') || location.pathname.includes('/backlog') || location.pathname.includes('/reports') || location.pathname.includes('/documents')) && (
+                      <>
+                        <Link to={`/groups/${g._id}/reports`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/reports`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
+                          <i className="fas fa-chart-pie" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Resumen
+                        </Link>
+                        <Link to={`/groups/${g._id}/backlog`} className={`sidebar-item ${location.pathname.includes(`/groups/${g._id}/backlog`) ? 'active' : ''}`} style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto' }}>
+                          <i className="fas fa-list" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Backlog
+                        </Link>
+                      </>
+                    )}
+                    
+                    <div 
+                      onClick={() => setSettingsGroupId(g._id)} 
+                      className="sidebar-item" 
+                      style={{ fontSize: '0.85rem', padding: '6px 12px', minHeight: 'auto', cursor: 'pointer' }}
+                    >
+                      <i className="fas fa-cog" style={{ fontSize: '0.85rem', marginRight: '10px' }}></i> Configuración
+                    </div>
                   </div>
                 )}
               </div>
