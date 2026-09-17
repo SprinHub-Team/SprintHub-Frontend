@@ -2,12 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, getBoardById, removeColumn } from '../../services/sprintHubServices';
+import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, removeColumn } from '../../services/sprintHubServices';
+import { showAlert } from '../../utils/alerts';
 import EditCardModal from './EditCardModal';
+import ReportModal from './ReportModal';
+import { socket } from '../../services/socket';
+
 import './Kanban.css';
 
 const KanbanBoard: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
+  const [groupId, setGroupId] = useState<string>('');
+  console.log(groupId);
+  
   const [columns, setColumns] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
@@ -20,25 +27,21 @@ const KanbanBoard: React.FC = () => {
 
   // Filtros
   const [searchTitle, setSearchTitle] = useState('');
+  const [assigneeFilter, setAssigneeFilter] = useState('');
+  const [showReport, setShowReport] = useState(false);
 
   const fetchBoardData = async () => {
     if (!boardId) return;
     try {
       const filters = searchTitle ? { title: searchTitle } : undefined;
-      const [colsRes, cardsRes, boardRes] = await Promise.all([
+      // Retiramos getBoardById del Promise.all porque la ruta HTTP no existe, 
+      // lo pediremos por Socket a continuación.
+      const [colsRes, cardsRes] = await Promise.all([
         getColumns(boardId),
-        getCards(boardId, filters),
-        getBoardById(boardId)
+        getCards(boardId, filters)
       ]);
       setColumns(colsRes?.data || colsRes || []);
       setCards(cardsRes?.data || cardsRes || []);
-      
-      // La respuesta del board incluye group que tiene members poblados
-      if (boardRes?.group?.members) {
-        setMembers(boardRes.group.members);
-      } else if (boardRes?.data?.group?.members) {
-        setMembers(boardRes.data.group.members);
-      }
     } catch (error) {
       console.error('Error fetching board data', error);
     }
@@ -46,30 +49,79 @@ const KanbanBoard: React.FC = () => {
 
   useEffect(() => {
     fetchBoardData();
+
+    if(!boardId) return;
+
+    socket.emit('board:join', boardId, (res: any) => {
+      if (res?.ok && res?.board){
+        const bData = res?.board;
+            if (bData?.groupId) setGroupId(bData.groupId);
+    else if (bData?.group?._id) setGroupId(bData.group._id);
+
+    if (bData?.group?.members) {
+      setMembers(bData.group.members);
+    } else if (bData?.members) {
+      setMembers(bData.members);
+    }
+      } else {
+        console.error('error al unirse al tablero', res?.error);
+      }
+ 
+  });
+   
+  socket.on('column:created', (newColumn) => {
+      setColumns(prev => [...prev, newColumn]);
+    });
+    socket.on('column:updated', (updatedColumn) => {
+      setColumns(prev => prev.map(c => c._id === updatedColumn._id ? updatedColumn : c));
+    });
+    socket.on('column:deleted', (data) => {
+      setColumns(prev => prev.filter(c => c._id !== data.columnId));
+    });
+    // 3. Escuchar Sockets de Tarjetas
+    socket.on('card:created', (newCard) => {
+      setCards(prev => [...prev, newCard]);
+    });
+    socket.on('card:updated', (updatedCard) => {
+      setCards(prev => prev.map(c => c._id === updatedCard._id ? updatedCard : c));
+    });
+    socket.on('card:deleted', (cardId) => {
+      setCards(prev => prev.filter(c => c._id !== cardId));
+    });
+    // Limpieza de sockets al desmontar el componente
+    return () => {
+      socket.emit('board:leave', boardId);
+      socket.off('column:created');
+      socket.off('column:updated');
+      socket.off('column:deleted');
+      socket.off('card:created');
+      socket.off('card:updated');
+      socket.off('card:deleted');
+    };
   }, [boardId, searchTitle]);
 
-  const handleCreateColumn = async (e: React.FormEvent) => {
+      const handleCreateColumn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!boardId || !newColumnName) return;
+    if (!newColumnName) return;
     try {
-      await createColumn({ name: newColumnName, boardId });
+      await createColumn({ name: newColumnName, boardId: boardId! });
       setNewColumnName('');
       fetchBoardData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear la columna');
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleCreateCard = async (e: React.FormEvent, columnId: string) => {
     e.preventDefault();
-    if (!boardId || !newCardTitle) return;
+    if (!newCardTitle) return;
     try {
-      await createCard({ title: newCardTitle, boardId, columnId });
+      await createCard({ title: newCardTitle, columnId });
       setNewCardTitle('');
       setActiveColumnId(null);
       fetchBoardData();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear la tarjeta');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -79,9 +131,10 @@ const KanbanBoard: React.FC = () => {
       setEditingCard(null);
       fetchBoardData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al actualizar la tarjeta');
+      showAlert.error('Aviso', error.response?.data?.message || 'Error al actualizar la tarjeta');
     }
   };
+
 
   const handleDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
@@ -98,7 +151,7 @@ const KanbanBoard: React.FC = () => {
       await updateCard(draggableId, { columnId: destination.droppableId });
       const destColumn = columns.find(c => c._id === destination.droppableId);
       if (destColumn && destColumn.name.toLowerCase().includes('finalizad')) {
-        alert('¡Tarea Completada! 🎉');
+        showAlert.success('¡Listo!', '¡Tarea Completada! 🎉');
       }
     } catch (error) {
       console.error('Error moviendo tarjeta', error);
@@ -118,24 +171,45 @@ const KanbanBoard: React.FC = () => {
   };
 
   return (
-    <div className="kanban-wrapper">
-      <header className="kanban-header">
+    <div className="kanban-wrapper" style={{ padding: '0', display: 'flex', flexDirection: 'column' }}>
+      
+      <div style={{ padding: '0 20px 20px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <header className="kanban-header">
         <h1>Tablero Kanban</h1>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <input 
-            type="text" 
-            placeholder="Buscar tarjetas..." 
-            value={searchTitle}
-            onChange={(e) => setSearchTitle(e.target.value)}
-            className="search-input"
-            style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
-          <Link to="/dashboard" className="btn-secondary">Volver al Dashboard</Link>
+          <div className="filters" style={{ display: 'flex', gap: '10px' }}>
+            <input 
+              type="text" 
+              placeholder="Buscar tarjetas..." 
+              value={searchTitle}
+              onChange={(e) => setSearchTitle(e.target.value)}
+              className="search-input"
+              style={{ padding: '0.5rem 1rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', outline: 'none' }}
+            />
+            <select 
+              value={assigneeFilter} 
+              onChange={(e) => setAssigneeFilter(e.target.value)}
+              style={{ padding: '0.5rem 1rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#b6c2cf', outline: 'none' }}
+            >
+              <option value="" style={{ color: '#000' }}>Todos los asignados</option>
+              {members.map(m => (
+                <option key={m.user?._id || m.user} value={m.user?._id || m.user} style={{ color: '#000' }}>
+                  {m.user?.name || m.user?.email || 'Miembro'}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn-secondary" style={{ borderRadius: '20px' }} onClick={() => setShowReport(true)}>
+              <i className="fas fa-file-alt" style={{ marginRight: '8px' }}></i> Reporte
+            </button>
+            <Link to="/dashboard" className="btn-secondary" style={{ borderRadius: '20px' }}>Volver</Link>
+          </div>
         </div>
       </header>
 
       <div className="add-column-bar">
-        <form onSubmit={handleCreateColumn}>
+        <form onSubmit={handleCreateColumn} style={{ display: 'flex', gap: '10px' }}>
           <input 
             type="text" 
             placeholder="Nueva Columna" 
@@ -149,7 +223,11 @@ const KanbanBoard: React.FC = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="kanban-board">
           {columns.map(col => {
-            const columnCards = cards.filter(c => c.columnId === col._id || c.columnId === col.id);
+            const columnCards = cards
+              .filter(c => c.columnId === col._id || c.columnId === col.id)
+              .filter(c => searchTitle ? c.title.toLowerCase().includes(searchTitle.toLowerCase()) : true)
+              .filter(c => assigneeFilter ? c.assignedTo === assigneeFilter : true);
+            
             return (
               <div key={col._id} className="kanban-column">
                 <div className="column-header">
@@ -159,7 +237,7 @@ const KanbanBoard: React.FC = () => {
                     <button 
                       onClick={() => {
                         if(window.confirm('¿Eliminar esta columna y todo su contenido?')) {
-                          removeColumn(col._id).then(fetchBoardData).catch(e => alert(e.response?.data?.message || 'Error'));
+                          removeColumn(col._id).then(fetchBoardData).catch(e => showAlert.error('Error', e.response?.data?.message || 'Error'));
                         }
                       }} 
                       style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
@@ -255,6 +333,17 @@ const KanbanBoard: React.FC = () => {
           onSave={handleUpdateCardDetails} 
         />
       )}
+
+      {showReport && (
+        <ReportModal 
+          boardName="Kanban Board"
+          columns={columns}
+          cards={cards}
+          members={members}
+          onClose={() => setShowReport(false)}
+        />
+      )}
+      </div>
     </div>
   );
 };

@@ -71,3 +71,5 @@ input:focus {
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
 }
+
+.btn-primary, .btn-secondary { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; }

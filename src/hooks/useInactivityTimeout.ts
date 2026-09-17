@@ -1,3 +1,4 @@
+import { showAlert } from '../utils/alerts';
 import { useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -17,7 +18,7 @@ export const useInactivityTimeout = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         logout();
-        alert('Tu sesión ha expirado por inactividad.');
+        showAlert.error('Aviso', 'Tu sesión ha expirado por inactividad.');
         window.location.href = '/login';
       }, INACTIVITY_LIMIT);
     };

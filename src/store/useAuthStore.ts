@@ -11,6 +11,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   login: (user: User, token: string) => void;
+  setUser: (user: User) => void;
   logout: () => void;
 }
 
@@ -26,6 +27,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     sessionStorage.setItem('user', JSON.stringify(user));
     sessionStorage.setItem('token', token);
     set({ user, token });
+  },
+  setUser: (user) => {
+    sessionStorage.setItem('user', JSON.stringify(user));
+    set({ user });
   },
   logout: () => {
     sessionStorage.removeItem('user');

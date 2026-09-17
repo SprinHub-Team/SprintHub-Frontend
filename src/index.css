@@ -86,3 +86,37 @@ input, button, select, textarea {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+
+/* SweetAlert2 Glassmorphism Styles */
+.glass-popup {
+  border-radius: var(--radius-lg) !important;
+  background: rgba(30, 33, 40, 0.75) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.glass-title {
+  color: #ffffff !important;
+  font-family: var(--heading) !important;
+  font-weight: 600 !important;
+}
+
+.glass-html {
+  color: var(--text-muted) !important;
+  font-size: 0.95rem !important;
+}
+
+.glass-btn {
+  border-radius: var(--radius-sm) !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  border: none !important;
+  transition: var(--transition) !important;
+}
+
+.swal2-actions {
+  gap: 12px;
+}

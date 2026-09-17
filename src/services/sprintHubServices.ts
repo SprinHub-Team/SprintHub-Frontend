@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from './api';
+import { socket } from './socket';
 
 // --- AUTENTICACIÓN ---
 export const registerUser = async (userData: any) => {
@@ -27,6 +29,11 @@ export const getMyGroups = async () => {
   return data;
 };
 
+export const getGroupById = async (groupId: string) => {
+  const { data } = await api.get(`/groups/${groupId}`);
+  return data;
+};
+
 export const addMemberToGroup = async (groupId: string, email: string, role: string) => {
   const { data } = await api.post(`/groups/${groupId}/members`, { email, role });
   return data;
@@ -48,7 +55,7 @@ export const getBoardById = async (boardId: string) => {
   return data;
 };
 
-export const createBoard = async (payload: { title: string, description?: string, groupId: string, columnsIds?: string[] }) => {
+export const createBoard = async (payload: { title: string, description?: string, groupId: string, columnsIds?: string[], templateId?: string }) => {
   const { data } = await api.post('/boards', payload);
   return data;
 };
@@ -70,24 +77,40 @@ export const getColumns = async (boardId: string) => {
 };
 
 export const createColumn = async (payload: { name: string, boardId: string }) => {
-  const { data } = await api.post('/columns', payload);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('column:create', payload, (res: any) => {
+      if (res?.ok) resolve(res.column);
+      else reject(new Error(res?.error || 'Error al crear columna'));
+    });
+  });
 };
 
 export const updateColumn = async (id: string, payload: { name?: string, cardsId?: string[] }) => {
-  const { data } = await api.put(`/columns/${id}`, payload);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('column:update', { paramData: { columnId: id }, columnData: payload }, (res: any) => {
+      if (res?.ok) resolve(res.column);
+      else reject(new Error(res?.error || 'Error al actualizar columna'));
+    });
+  });
 };
 
 export const removeColumn = async (id: string) => {
-  const { data } = await api.delete(`/columns/${id}`);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('column:delete', id, (res: any) => {
+      if (res?.ok) resolve(res);
+      else reject(new Error(res?.error || 'Error al eliminar columna'));
+    });
+  });
 };
 
 // --- ACTIVIDADES / TARJETAS ---
 export const createCard = async (cardData: any) => {
-  const { data } = await api.post('/cards', cardData);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('card:create', cardData, (res: any) => {
+      if (res?.ok) resolve(res.card);
+      else reject(new Error(res?.error || 'Error al crear tarjeta'));
+    });
+  });
 };
 
 export const getCards = async (boardId: string, filters?: { title?: string; columnId?: string; assignedTo?: string }) => {
@@ -96,11 +119,129 @@ export const getCards = async (boardId: string, filters?: { title?: string; colu
 };
 
 export const updateCard = async (cardId: string, updates: any) => {
-  const { data } = await api.put(`/cards/${cardId}`, updates);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('card:update', { paramData: { cardId }, cardData: updates }, (res: any) => {
+      if (res?.ok) resolve(res.card);
+      else reject(new Error(res?.error || 'Error al actualizar tarjeta'));
+    });
+  });
 };
 
 export const deleteCard = async (cardId: string) => {
-  const { data } = await api.delete(`/cards/${cardId}`);
+  return new Promise((resolve, reject) => {
+    socket.emit('card:delete', cardId, (res: any) => {
+      if (res?.ok) resolve(res);
+      else reject(new Error(res?.error || 'Error al eliminar tarjeta'));
+    });
+  });
+};
+
+export const uploadAttachment = async (cardId: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post(`/cards/${cardId}/attachments`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return data;
+};
+
+export const removeAttachment = async (cardId: string, attachmentId: string) => {
+  const { data } = await api.delete(`/cards/${cardId}/attachments/${attachmentId}`);
+  return data;
+};
+
+// --- COMENTARIOS ---
+export const createComment = async (commentData: { name: string, description: string, cardId: string, createdFor?: string }) => {
+  const { data } = await api.post('/comments', commentData);
+  return data;
+};
+
+export const getCommentsByCard = async (cardId: string) => {
+  const { data } = await api.get(`/comments/card/${cardId}`);
+  return data;
+};
+
+export const deleteComment = async (commentId: string) => {
+  const { data } = await api.delete(`/comments/${commentId}`);
+  return data;
+};
+
+export const getUserProfile = async () => {
+  const { data } = await api.get('/users/me');
+  return data;
+};
+
+// --- REPORTES ---
+export const getGroupPerformanceReport = async (groupId: string) => {
+  const { data } = await api.get(`/reports/groups/${groupId}`);
+  return data;
+};
+
+export const getUserPerformanceReport = async (userId: string, startDate?: string, endDate?: string) => {
+  const { data } = await api.get(`/reports/users/${userId}`, {
+    params: { startDate, endDate }
+  });
+  return data;
+};
+
+export const getCompletedActivitiesReport = async (groupId: string) => {
+  const { data } = await api.get(`/reports/groups/${groupId}/completed`);
+  return data;
+};
+
+// --- BACKLOG (CardPB) ---
+export const getBacklog = async (groupId: string, search?: string, assignedTo?: string) => {
+  const { data } = await api.get('/cardPB/group/' + groupId, { params: { search, assignedTo } });
+  return data;
+};
+
+export const createBacklogCard = async (payload: any) => {
+  const { data } = await api.post('/cardPB', payload);
+  return data;
+};
+
+export const deleteBacklogCard = async (id: string) => {
+  const { data } = await api.delete('/cardPB/' + id);
+  return data;
+};
+
+export const exportBacklogCsv = async (groupId: string) => {
+  const { data } = await api.get('/cardPB/group/' + groupId + '/export-csv', { responseType: 'blob' });
+  return data;
+};
+
+// --- SPRINTS ---
+export const getSprints = async (groupId: string) => {
+  const { data } = await api.get('/sprints/group/' + groupId);
+  return data;
+};
+
+export const createSprint = async (payload: any) => {
+  const { data } = await api.post('/sprints', payload);
+  return data;
+};
+
+export const moveCardToSprint = async (cardId: string, sprintId: string | null) => {
+  const { data } = await api.put('/sprints/cards/' + cardId + '/move', { sprintId });
+  return data;
+};
+
+export const getSprintCards = async (sprintId: string) => {
+  const { data } = await api.get('/sprints/' + sprintId + '/cards');
+  return data;
+};
+
+export const exportCardToBoard = async (cardId: string, columnId: string) => {
+  const { data } = await api.post('/sprints/cards/' + cardId + '/export', { columnId });
+  return data;
+};
+
+export const getTemplates = async () => {
+  const { data } = await api.get('/templates');
+  return data;
+};
+
+export const applyTemplateToBoard = async (boardId: string, templateId: string) => {
+  const { data } = await api.post(`/boards/${boardId}/apply-template`, { templateId });
   return data;
 };

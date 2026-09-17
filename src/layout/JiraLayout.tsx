@@ -1,0 +1,413 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
+import { HookSidebar } from '../components/HookSidebar';
+import { NotificationBell } from '../components/NotificationBell';
+import { getBoardById, getMyGroups } from '../services/sprintHubServices';
+import BoardSwitcher from './BoardSwitcher';
+import BoardSettingsModal from '../views/board/BoardSettingsModal';
+import ProfileSettingsModal from '../views/auth/ProfileSettingsModal';
+import { GroupSettingsModal } from '../components/GroupSettingsModal';
+import './JiraLayout.css';
+
+interface JiraLayoutProps {
+  children: React.ReactNode;
+}
+
+const JiraLayout: React.FC<JiraLayoutProps> = ({ children }) => {
+  const user = useAuthStore((state: any) => state.user);
+  const logout = useAuthStore((state: any) => state.logout);
+  const location = useLocation();
+  
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [boardData, setBoardData] = useState<any>(null);
+  
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showAppSwitcher, setShowAppSwitcher] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [settingsGroupId, setSettingsGroupId] = useState<string | null>(null);
+
+  const [groups, setGroups] = useState<any[]>([]);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const res = await getMyGroups();
+        setGroups(res?.data || res || []);
+      } catch(err) {
+        console.error(err);
+      }
+    };
+    if (user) fetchGroups();
+  }, [user]);
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
+  };
+
+  useEffect(() => {
+    const handleOpenSettings = async (e: any) => {
+      const bId = e.detail.boardId;
+      try {
+        const res = await getBoardById(bId);
+        setBoardData(res.data || res);
+        setShowSettingsModal(true);
+      } catch (err) {
+        console.error("Error opening board settings:", err);
+      }
+    };
+    window.addEventListener('open-board-settings', handleOpenSettings);
+    return () => window.removeEventListener('open-board-settings', handleOpenSettings);
+  }, []);
+
+  return (
+    <div className="jira-layout">
+      {/* Modern Top Navbar */}
+      <nav className="modern-topbar">
+        <div className="topbar-left">
+          <div style={{ position: 'relative' }}>
+            <div className="app-switcher-icon pulse-hover" onClick={() => setShowAppSwitcher(!showAppSwitcher)}>
+              <div className="dot-grid">
+                <span/><span/><span/>
+                <span/><span/><span/>
+                <span/><span/><span/>
+              </div>
+            </div>
+            {showAppSwitcher && (
+              <div className="profile-dropdown glass-panel" style={{ left: 0, right: 'auto', width: '300px', padding: '20px', zIndex: 9999, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
+                <div style={{ marginBottom: '15px', color: '#f8fafc', fontWeight: 600, fontSize: '1.1rem' }}>
+                  Tus aplicaciones
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                  <Link to="/dashboard" onClick={() => setShowAppSwitcher(false)} className="app-switcher-item pulse-hover" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textDecoration: 'none', color: '#cbd5e1', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ background: 'rgba(59, 130, 246, 0.2)', padding: '12px', borderRadius: '50%', marginBottom: '10px' }}>
+                      <i className="fas fa-project-diagram" style={{ color: '#60a5fa', fontSize: '1.5rem' }}></i>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>SprintHub</span>
+                  </Link>
+
+                  <Link to="/templates" onClick={() => setShowAppSwitcher(false)} className="app-switcher-item pulse-hover" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textDecoration: 'none', color: '#cbd5e1', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '12px', borderRadius: '50%', marginBottom: '10px' }}>
+                      <i className="fas fa-copy" style={{ color: '#34d399', fontSize: '1.5rem' }}></i>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Plantillas</span>
+                  </Link>
+                  
+                  <Link to="/teams" onClick={() => setShowAppSwitcher(false)} className="app-switcher-item pulse-hover" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textDecoration: 'none', color: '#cbd5e1', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ background: 'rgba(245, 158, 11, 0.2)', padding: '12px', borderRadius: '50%', marginBottom: '10px' }}>
+                      <i className="fas fa-users" style={{ color: '#fbbf24', fontSize: '1.5rem' }}></i>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Equipos</span>
+                  </Link>
+                  
+                  <Link to="/projects" onClick={() => setShowAppSwitcher(false)} className="app-switcher-item pulse-hover" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '15px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textDecoration: 'none', color: '#cbd5e1', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.2)', padding: '12px', borderRadius: '50%', marginBottom: '10px' }}>
+                      <i className="fas fa-chart-pie" style={{ color: '#c4b5fd', fontSize: '1.5rem' }}></i>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Proyectos</span>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="brand-logo pulse-hover">
+            <div className="logo-icon-modern">
+              <div className="logo-glow"></div>
+            </div>
+            <span className="gradient-text-small">SprintHub</span>
+          </div>
+          
+          <div className="topbar-links">
+            <Link to="/dashboard" className="glass-link" style={{textDecoration:'none', color:'inherit'}}>Dashboard</Link>
+            <Link to="/projects" className="glass-link" style={{textDecoration:'none', color:'inherit'}}>Proyectos</Link>
+            <Link to="/teams" className="glass-link" style={{textDecoration:'none', color:'inherit'}}>Equipos</Link>
+            <Link to="/dashboard" className="create-btn-modern" style={{textDecoration:'none', display: 'flex', alignItems: 'center', gap: '8px'}}><i className="fas fa-plus"></i> Nuevo</Link>
+          </div>
+        </div>
+
+        <div className="topbar-right">
+          <div className="modern-search">
+            <i className="fas fa-search"></i>
+            <input type="text" placeholder="Buscar en todo SprintHub..." />
+            <div className="search-shortcut">⌘K</div>
+          </div>
+          <div className="topbar-icons" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <NotificationBell hasNotifications={true} onClick={() => console.log('Bell clicked')} />
+            <Link to="/wip" className="icon-wrapper" style={{color:'inherit'}}><i className="far fa-question-circle"></i></Link>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <div className="user-avatar-modern" onClick={() => setShowProfileMenu(!showProfileMenu)} title="Mi Perfil" style={{ overflow: 'hidden', padding: user?.profilePicture ? 0 : undefined }}>
+              {user?.profilePicture ? (
+                <img src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:4000'}${user.profilePicture}`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                user?.name?.charAt(0).toUpperCase() || 'U'
+              )}
+            </div>
+            {showProfileMenu && (
+              <div className="profile-dropdown glass-panel">
+                <div className="dropdown-header">
+                  <strong>{user?.name}</strong>
+                  <span>{user?.email}</span>
+                </div>
+                <div className="dropdown-divider"></div>
+                <button className="dropdown-item" onClick={() => { setShowProfileMenu(false); setShowProfileModal(true); }}>
+                  <i className="fas fa-cog"></i> Configuración
+                </button>
+                <div className="dropdown-divider"></div>
+                <button className="dropdown-item danger" onClick={logout}>
+                  <i className="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <div className="jira-body">
+        {/* Left Sidebar */}
+        <aside className="jira-sidebar" style={{ overflowY: 'auto' }}>
+          <div className="sidebar-group">
+            <Link to="/dashboard" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
+              <i className="fas fa-columns"></i> Tableros
+            </Link>
+            <Link to="/templates" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
+              <i className="fas fa-copy"></i> Plantillas
+            </Link>
+            <Link to="/dashboard" className="sidebar-item" style={{textDecoration:'none', color:'inherit'}}>
+              <i className="fas fa-home"></i> Inicio
+            </Link>
+          </div>
+          
+          <div className="sidebar-divider"></div>
+          
+          <div className="sidebar-group">
+            <div className="sidebar-section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Espacios de trabajo</span>
+              <Link to="/dashboard" style={{color:'inherit'}}><i className="fas fa-plus"></i></Link>
+            </div>
+            
+            {groups.map(g => (
+              <div key={g._id} style={{ marginBottom: '4px' }}>
+                <div 
+                  className="sidebar-item" 
+                  onClick={() => toggleGroup(g._id)}
+                  style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', paddingRight: '16px' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div className="project-icon" style={{ background: '#0052cc', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '10px', overflow: 'hidden' }}>
+                      {g.profilePicture ? (
+                        <img src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:4000'}${g.profilePicture}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        g.name.substring(0,2).toUpperCase()
+                      )}
+                    </div>
+                    <span style={{ marginLeft: '10px', fontSize: '0.9rem' }}>{g.name}</span>
+                  </div>
+                  <i className={`fas fa-chevron-${expandedGroups[g._id] ? 'up' : 'down'}`} style={{ fontSize: '0.7rem', color: '#9fadbc' }}></i>
+                </div>
+                
+                {expandedGroups[g._id] && (
+                  <div className="sidebar-group-children fade-down">
+                    <HookSidebar
+                      items={[
+                        { id: 'tableros', label: 'Tableros', icon: <i className="fas fa-columns" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/boards` },
+                        { id: 'miembros', label: 'Miembros', icon: <i className="fas fa-user-friends" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/members` },
+                        { id: 'backlog', label: 'Backlog', icon: <i className="fas fa-list" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/backlog` },
+                        // Solo mostrar resumen si estamos interactuando en vistas profundas
+                        ...((location.pathname.includes('/board/') || location.pathname.includes('/reports') || location.pathname.includes('/documents')) 
+                          ? [{ id: 'resumen', label: 'Resumen', icon: <i className="fas fa-chart-pie" style={{ width: '20px' }}></i>, href: `/groups/${g._id}/reports` }] 
+                          : []),
+                        { id: 'config', label: 'Configuración', icon: <i className="fas fa-cog" style={{ width: '20px' }}></i>, onClick: () => setSettingsGroupId(g._id) }
+                      ]}
+                      color="#3b82f6"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="jira-content">
+          {/* Modern Floating Topbar inside main content instead of global topbar, or just update the current tabs */}
+          <div className="modern-header">
+            <div className="header-breadcrumbs">
+              <span>Espacio</span> <i className="fas fa-chevron-right"></i> 
+              {(() => {
+                const match = location.pathname.match(/\/board\/([a-zA-Z0-9_]+)/);
+                if (match && match[1]) {
+                  return <BoardSwitcher currentBoardId={match[1]} />;
+                }
+                return <span>SprintHub</span>;
+              })()}
+            </div>
+            <div className="header-main">
+              <div className="header-title-wrapper">
+                <div className="pulse-icon">
+                  <div className="pulse-circle"></div>
+                  <i className="fas fa-rocket"></i>
+                </div>
+                <h1>
+                  {(() => {
+                    const gMatch = location.pathname.match(/\/groups\/([a-zA-Z0-9_]+)/);
+                    const bMatch = location.pathname.match(/\/board\/([a-zA-Z0-9_]+)/);
+                    let cId = gMatch ? gMatch[1] : (bMatch ? localStorage.getItem('currentGroupId') : null);
+                    const cg = groups.find(g => g._id === cId);
+                    return cg ? cg.name : 'SprintHub Workspace';
+                  })()}
+                </h1>
+              </div>
+              <div className="header-actions">
+                <button className="icon-btn tooltip" data-tooltip="Invitar equipo"><i className="fas fa-user-plus"></i></button>
+                <button className="icon-btn tooltip" data-tooltip="Estadísticas"><i className="fas fa-chart-pie"></i></button>
+                <button className="icon-btn tooltip" data-tooltip="Configuración del Espacio" onClick={() => {
+                  const gMatch = location.pathname.match(/\/groups\/([a-zA-Z0-9_]+)/);
+                  const bMatch = location.pathname.match(/\/board\/([a-zA-Z0-9_]+)/);
+                  let cId = gMatch ? gMatch[1] : (bMatch ? localStorage.getItem('currentGroupId') : null);
+                  if(cId) setSettingsGroupId(cId);
+                }}><i className="fas fa-cog"></i></button>
+              </div>
+            </div>
+            
+            <div className="modern-tabs">
+              {(() => {
+                const boardMatch = location.pathname.match(/\/board\/([a-zA-Z0-9_]+)/);
+                const boardId = boardMatch ? boardMatch[1] : null;
+                
+                const groupMatch = location.pathname.match(/\/groups\/([a-zA-Z0-9_]+)/);
+                let currentGroupId = groupMatch ? groupMatch[1] : null;
+
+                if (currentGroupId) {
+                  localStorage.setItem('currentGroupId', currentGroupId);
+                } else if (boardId) {
+                  currentGroupId = localStorage.getItem('currentGroupId');
+                }
+
+                const path = location.pathname;
+
+                if (boardId) {
+                  // Inside a board: Show General + all project tabs
+                  // To link to group-level features like Backlog and Documents, we need the groupId.
+                  // Since JiraLayout might not know the exact groupId of the board synchronously, 
+                  // we can fallback to the first expanded group or omit if unavailable, but 
+                  // usually we pass it or it's not strictly needed for UI presentation if handled well.
+                  // A better approach is to render the exact tabs requested:
+                  return (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                      <div style={{ display: 'flex' }}>
+                        <div className="m-tab active"><i className="fas fa-border-all"></i> General</div>
+                        <Link to={`/board/${boardId}/reports`} className={`m-tab ${path.includes('/reports') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-chart-pie"></i> Resumen
+                        </Link>
+                        <Link to={`/board/${boardId}/list`} className={`m-tab ${path.includes('/list') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-stream"></i> Lista
+                        </Link>
+                        <Link to={`/board/${boardId}`} className={`m-tab ${path === `/board/${boardId}` ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-columns"></i> Tablero
+                        </Link>
+                        {currentGroupId && (
+                          <>
+                            <Link to={`/groups/${currentGroupId}/backlog`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                              <i className="fas fa-list"></i> Backlog
+                            </Link>
+                            <Link to={`/groups/${currentGroupId}/documents`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                              <i className="fas fa-folder-open"></i> Documentación
+                            </Link>
+                          </>
+                        )}
+                        <Link to={`/wip`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-code"></i> Desarrollo
+                        </Link>
+                        <Link to={`/wip`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-wpforms"></i> Formularios
+                        </Link>
+                        <Link to={`/wip`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <i className="fas fa-calendar-alt"></i> Cronograma
+                        </Link>
+                      </div>
+                      
+                      <div className="board-settings-action">
+                        <button 
+                          className="icon-btn tooltip" 
+                          data-tooltip="Configuración del tablero" 
+                          onClick={() => window.dispatchEvent(new CustomEvent('open-board-settings', { detail: { boardId } }))}
+                          style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}
+                        >
+                          <i className="fas fa-cog"></i>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                if (currentGroupId) {
+                  return (
+                    <div style={{ display: 'flex' }}>
+                      <Link to={`/groups/${currentGroupId}/boards`} className={`m-tab ${path.includes('/boards') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <i className="fas fa-border-all"></i> General
+                      </Link>
+                      {(path.includes('/backlog') || path.includes('/members') || path.includes('/reports') || path.includes('/documents')) && (
+                        <>
+                          <Link to={`/groups/${currentGroupId}/reports`} className={`m-tab ${path.includes('/reports') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <i className="fas fa-chart-pie"></i> Resumen
+                          </Link>
+                          <Link to={`/groups/${currentGroupId}/backlog`} className={`m-tab ${path.includes('/backlog') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <i className="fas fa-list"></i> Backlog
+                          </Link>
+                          <Link to={`/groups/${currentGroupId}/documents`} className={`m-tab ${path.includes('/documents') ? 'active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <i className="fas fa-folder-open"></i> Documentación
+                          </Link>
+                          <Link to={`/wip`} className={`m-tab`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <i className="fas fa-code"></i> Desarrollo
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    <div className="m-tab active"><i className="fas fa-border-all"></i> General</div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+
+          <div className="jira-inner-content">
+            {children}
+          </div>
+        </main>
+      </div>
+      
+      {showSettingsModal && boardData && (
+        <BoardSettingsModal 
+          board={boardData} 
+          groupId={boardData.groupId} 
+          onClose={() => setShowSettingsModal(false)}
+          onUpdate={() => window.location.reload()}
+        />
+      )}
+      
+      {showProfileModal && (
+        <ProfileSettingsModal onClose={() => setShowProfileModal(false)} />
+      )}
+      
+      {settingsGroupId && (
+        <GroupSettingsModal 
+          group={groups.find(g => g._id === settingsGroupId) || {}}
+          onClose={() => setSettingsGroupId(null)}
+          onUpdate={() => {
+            getMyGroups().then(res => setGroups(res.data || res || []));
+            window.location.reload();
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+export default JiraLayout;
