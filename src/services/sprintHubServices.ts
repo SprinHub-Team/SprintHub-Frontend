@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import api from './api';
+import { socket } from './socket';
 
 // --- AUTENTICACIÓN ---
 export const registerUser = async (userData: any) => {
@@ -76,24 +77,40 @@ export const getColumns = async (boardId: string) => {
 };
 
 export const createColumn = async (payload: { name: string, boardId: string }) => {
-  const { data } = await api.post('/columns', payload);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('column:create', payload, (res: any) => {
+      if (res?.ok) resolve(res.column);
+      else reject(new Error(res?.error || 'Error al crear columna'));
+    });
+  });
 };
 
 export const updateColumn = async (id: string, payload: { name?: string, cardsId?: string[] }) => {
-  const { data } = await api.put(`/columns/${id}`, payload);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('column:update', { paramData: { columnId: id }, columnData: payload }, (res: any) => {
+      if (res?.ok) resolve(res.column);
+      else reject(new Error(res?.error || 'Error al actualizar columna'));
+    });
+  });
 };
 
 export const removeColumn = async (id: string) => {
-  const { data } = await api.delete(`/columns/${id}`);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('column:delete', id, (res: any) => {
+      if (res?.ok) resolve(res);
+      else reject(new Error(res?.error || 'Error al eliminar columna'));
+    });
+  });
 };
 
 // --- ACTIVIDADES / TARJETAS ---
 export const createCard = async (cardData: any) => {
-  const { data } = await api.post('/cards', cardData);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('card:create', cardData, (res: any) => {
+      if (res?.ok) resolve(res.card);
+      else reject(new Error(res?.error || 'Error al crear tarjeta'));
+    });
+  });
 };
 
 export const getCards = async (boardId: string, filters?: { title?: string; columnId?: string; assignedTo?: string }) => {
@@ -102,13 +119,21 @@ export const getCards = async (boardId: string, filters?: { title?: string; colu
 };
 
 export const updateCard = async (cardId: string, updates: any) => {
-  const { data } = await api.put(`/cards/${cardId}`, updates);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('card:update', { paramData: { cardId }, cardData: updates }, (res: any) => {
+      if (res?.ok) resolve(res.card);
+      else reject(new Error(res?.error || 'Error al actualizar tarjeta'));
+    });
+  });
 };
 
 export const deleteCard = async (cardId: string) => {
-  const { data } = await api.delete(`/cards/${cardId}`);
-  return data;
+  return new Promise((resolve, reject) => {
+    socket.emit('card:delete', cardId, (res: any) => {
+      if (res?.ok) resolve(res);
+      else reject(new Error(res?.error || 'Error al eliminar tarjeta'));
+    });
+  });
 };
 
 export const uploadAttachment = async (cardId: string, file: File) => {

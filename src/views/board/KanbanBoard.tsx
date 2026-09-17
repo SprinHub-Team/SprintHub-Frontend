@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, getBoardById, removeColumn } from '../../services/sprintHubServices';
+import { getColumns, createColumn, getCards, updateCard, createCard, deleteCard, removeColumn } from '../../services/sprintHubServices';
 import { showAlert } from '../../utils/alerts';
 import EditCardModal from './EditCardModal';
 import ReportModal from './ReportModal';
+import { socket } from '../../services/socket';
 
 import './Kanban.css';
 
@@ -33,23 +34,14 @@ const KanbanBoard: React.FC = () => {
     if (!boardId) return;
     try {
       const filters = searchTitle ? { title: searchTitle } : undefined;
-      const [colsRes, cardsRes, boardRes] = await Promise.all([
+      // Retiramos getBoardById del Promise.all porque la ruta HTTP no existe, 
+      // lo pediremos por Socket a continuación.
+      const [colsRes, cardsRes] = await Promise.all([
         getColumns(boardId),
-        getCards(boardId, filters),
-        getBoardById(boardId)
+        getCards(boardId, filters)
       ]);
       setColumns(colsRes?.data || colsRes || []);
       setCards(cardsRes?.data || cardsRes || []);
-      
-      const bData = boardRes?.data || boardRes;
-      if (bData?.groupId) setGroupId(bData.groupId);
-      else if (bData?.group?._id) setGroupId(bData.group._id);
-
-      if (boardRes?.group?.members) {
-        setMembers(boardRes.group.members);
-      } else if (boardRes?.data?.group?.members) {
-        setMembers(boardRes.data.group.members);
-      }
     } catch (error) {
       console.error('Error fetching board data', error);
     }
@@ -57,9 +49,58 @@ const KanbanBoard: React.FC = () => {
 
   useEffect(() => {
     fetchBoardData();
+
+    if(!boardId) return;
+
+    socket.emit('board:join', boardId, (res: any) => {
+      if (res?.ok && res?.board){
+        const bData = res?.board;
+            if (bData?.groupId) setGroupId(bData.groupId);
+    else if (bData?.group?._id) setGroupId(bData.group._id);
+
+    if (bData?.group?.members) {
+      setMembers(bData.group.members);
+    } else if (bData?.members) {
+      setMembers(bData.members);
+    }
+      } else {
+        console.error('error al unirse al tablero', res?.error);
+      }
+ 
+  });
+   
+  socket.on('column:created', (newColumn) => {
+      setColumns(prev => [...prev, newColumn]);
+    });
+    socket.on('column:updated', (updatedColumn) => {
+      setColumns(prev => prev.map(c => c._id === updatedColumn._id ? updatedColumn : c));
+    });
+    socket.on('column:deleted', (data) => {
+      setColumns(prev => prev.filter(c => c._id !== data.columnId));
+    });
+    // 3. Escuchar Sockets de Tarjetas
+    socket.on('card:created', (newCard) => {
+      setCards(prev => [...prev, newCard]);
+    });
+    socket.on('card:updated', (updatedCard) => {
+      setCards(prev => prev.map(c => c._id === updatedCard._id ? updatedCard : c));
+    });
+    socket.on('card:deleted', (cardId) => {
+      setCards(prev => prev.filter(c => c._id !== cardId));
+    });
+    // Limpieza de sockets al desmontar el componente
+    return () => {
+      socket.emit('board:leave', boardId);
+      socket.off('column:created');
+      socket.off('column:updated');
+      socket.off('column:deleted');
+      socket.off('card:created');
+      socket.off('card:updated');
+      socket.off('card:deleted');
+    };
   }, [boardId, searchTitle]);
 
-  const handleCreateColumn = async (e: React.FormEvent) => {
+      const handleCreateColumn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newColumnName) return;
     try {
