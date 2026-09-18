@@ -12,6 +12,7 @@ import Button from "@/components/common/ui/Button";
 function LoginPage(){
 
     const navigate = useNavigate();
+    
     const location = useLocation();
 
     const { executeLogin, isLoading } = useLogin();
@@ -21,9 +22,7 @@ function LoginPage(){
         password:''
     });
 
-    const [errors, setErrors] = useState<
-        Partial<Record<keyof LoginFormData, string>>
-    >({});
+    const [errors, setErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({});
 
     const[generalError, setGeneralError]= useState<string | null>(null);
 
@@ -57,6 +56,7 @@ function LoginPage(){
             const fieldErrors: Partial<Record<keyof LoginFormData, string>>={};
 
             for(const issue of validation.error.issues){
+                
                 const field = issue.path[0];
 
                 if(typeof field === 'string' && field in formData){

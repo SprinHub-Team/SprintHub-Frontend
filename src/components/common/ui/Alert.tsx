@@ -12,10 +12,10 @@ interface AlertProps {
 }
 
 const variantClasses: Record<AlertVariant, string> = {
-    success: 'border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--warning)]',
-    warning: 'border-[var(--warning-border)] bg-[var(--warning)] text-[var(--warning)]',
-    danger: 'border-[var(--danger-border)] bg-[var(--danger-bg)] text-[var(--danger)]',
-    info: 'border-[var(--border-strong)] bg-[var(--surface-2)] text-[(--info)]'
+    success: 'border-(--success-border) bg-(--success-bg) text-(--warning)',
+    warning: 'border-(--warning-border) bg-(--warning) text-(--warning)',
+    danger: 'border-(--danger-border) bg-[var(--danger-bg)] text-(--danger)',
+    info: 'border-(--border-strong) bg-(--surface-2) text-(--info)'
 
 };
 
@@ -24,7 +24,7 @@ function Alert({variant='info', children}:AlertProps){
         <div
           role='alert'
           className={`
-            rounded-[var(--radius-sm)]
+            rounded-(--radius-sm)
             border
             p-3
             text-sm

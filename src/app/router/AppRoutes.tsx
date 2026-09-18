@@ -1,8 +1,10 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import ProtectedRoute from '@/components/common/ProtectedRoute';
-import PublicRoute from '@/components/common/PublicRoute';
+import { Route, Routes } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute';
+import PublicRoute from './PublicRoute';
+
 import LoginPage from '@/features/auth/Pages/LoginPage';
 import RegisterPage from '@/features/auth/Pages/RegisterPage';
+import HomePage from '@/features/home/pages/HomePage';
 
 
 function AppRoutes() {
@@ -18,6 +20,12 @@ function AppRoutes() {
                     path="/register"
                     element={<RegisterPage />}
                 />
+
+                <Route
+                    path="/"
+                    element={<HomePage />}
+                />
+
             </Route>
 
             <Route element={<ProtectedRoute />}>
@@ -26,16 +34,6 @@ function AppRoutes() {
                     element={<div>Dashboard</div>}
                 />
             </Route>
-
-            <Route
-                path="/"
-                element={
-                    <Navigate
-                        to="/dashboard"
-                        replace
-                    />
-                }
-            />
 
             <Route
                 path="*"

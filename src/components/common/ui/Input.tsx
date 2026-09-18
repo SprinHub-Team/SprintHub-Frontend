@@ -11,7 +11,7 @@ function Input({label, error, id, className = '', ...props}: InputProps){
             {label && (
                 <label
                     htmlFor={id}
-                    className="block text-sm font-medium text-[var(--text)]"
+                    className="block text-sm font-medium text-(--text)"
                 >
                     {label}
                 </label>
@@ -21,29 +21,29 @@ function Input({label, error, id, className = '', ...props}: InputProps){
             id={id}
             className={`
                     w-full
-                    rounded-[var(--radius-sm)]
+                    rounded-(--radius-sm)
                     border
-                    bg-[var(--surface)]
+                    bg-(--surface)
                     px-3
                     py-2.5
-                    text-[var(--text)]
+                    text-(--text)
                     outline-none
-                    placeholder:text-[var(--text-light)]
+                    placeholder:text-(--text-light)
                     transition-[border-color, box-shadow]
                     duration-200
-                    focus:border-[var(--secondary)]
+                    focus:border(--secondary)
                     focus:ring-2
-                    focus:ring-[var(--secondary)]
+                    focus:ring-(--secondary)
                     focus:ring-opacity-20
                     disabled:cursor-not-allowed
                     disabled:opacity-50
-                    ${error ? 'border-[var(--danger)]' : 'border-[var(--border)]'}
+                    ${error ? 'border-(--danger)' : 'border-(--border)'}
                     ${className}
             `}
                 {...props}
             />
                 {error &&(
-                    <p className="text-sm text-[var(--danger)]">
+                    <p className="text-sm text-(--danger)">
                         {error}
                     </p>
                 )}

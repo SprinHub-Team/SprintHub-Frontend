@@ -14,10 +14,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>{
 
 const variantClasses: Record<ButtonVariant, string> = {
 
-    primary: 'bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)]',
-    secondary: 'bg-[var(--secondary)] text-[var(--on-gradient)] hover:brightness-110',
-    ghost: 'bg-transparent text-[var(--text)] hover:bg-[var(--surface-2)]',
-    danger: 'bg-[var(--danger)] text-white hover:brightness-110'
+    primary: 'bg-(--primary) text-white hover:bg-(--primary-dark)',
+    secondary: 'bg-(--secondary)] text-(--on-gradient) hover:brightness-110',
+    ghost: 'bg-transparent text-(--text)] hover:bg-(--surface-2)',
+    danger: 'bg-(--danger) text-white hover:brightness-110'
 
 }
 
@@ -30,7 +30,7 @@ function Button({variant='primary', children, isLoading, disabled, className='',
                 items-center
                 justify-center
                 gap-2
-                rounded-[var(--radius-sm)]
+                rounded-(--radius-sm)
                 px-4
                 py-2.5
                 font-medium
@@ -38,9 +38,9 @@ function Button({variant='primary', children, isLoading, disabled, className='',
                 duration-200
                 ease-out
                 focus:ring-2
-                focus:ring-[var(--secondary)]
+                focus:ring-(--secondary)
                 focus:ring-offset-2
-                focus:ring-offset-[var(--bg)]
+                focus:ring-offset-(--bg)
                 disabled:opacity-50
                 disabled:cursor-not-allowed
                 ${variantClasses[variant]}
