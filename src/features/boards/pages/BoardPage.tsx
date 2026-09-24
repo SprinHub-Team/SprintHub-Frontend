@@ -4,6 +4,7 @@ import { socketClient } from "@/services/socket/socketClient";
 import { useBoardDetailStore, type Card } from "../store/boardDetailStore";
 import { BoardColumn } from "../components/BoardColumn";
 import { EditCardModal } from "../components/EditCardModal";
+import { useGroupDetail } from "@/features/groups/hooks/useGroupDetail";
 import Alert from "@/components/common/ui/Alert";
 import Button from "@/components/common/ui/Button";
 
@@ -18,9 +19,18 @@ function BoardPage() {
 
     const [isAddingColumn, setIsAddingColumn] = useState(false);
     const [newColumnName, setNewColumnName] = useState('');
+    const [connectedUsers, setConnectedUsers] = useState<any[]>([]);
     
     // Modal de edición de tarjeta
     const [editingCard, setEditingCard] = useState<Card | null>(null);
+
+    const { fetchGroup } = useGroupDetail(board?.groupId || '');
+
+    useEffect(() => {
+        if (board?.groupId) {
+            fetchGroup();
+        }
+    }, [board?.groupId, fetchGroup]);
 
     useEffect(() => {
         if (!id) return;
@@ -37,7 +47,20 @@ function BoardPage() {
         const handleConnect = () => {
             socket.emit('board:join', id, (res: any) => {
                 if (res.ok) {
-                    setBoard(res.board);
+                    const mappedBoard = {
+                        ...res.board,
+                        _id: res.board.id || res.board._id,
+                        columnas: (res.board.columns || []).map((col: any) => ({
+                            ...col,
+                            _id: col.id || col._id,
+                            tarjetas: (col.cards || []).map((card: any) => ({
+                                ...card,
+                                _id: card.id || card._id,
+                                columnId: col.id || col._id,
+                            }))
+                        }))
+                    };
+                    setBoard(mappedBoard);
                 } else {
                     setError(res.error || 'Error al unir al tablero');
                 }
@@ -49,6 +72,10 @@ function BoardPage() {
         } else {
             socket.on('connect', handleConnect);
         }
+
+        socket.on('board:users', (users) => {
+            setConnectedUsers(users);
+        });
 
         // Suscribirse a eventos de columnas
         socket.on('column:created', addColumn);
@@ -99,8 +126,8 @@ function BoardPage() {
     if (!board) return <div className="p-6 text-center text-[var(--text-secondary)]">Tablero no encontrado.</div>;
 
     return (
-        <div className="h-[calc(100vh-64px)] flex flex-col bg-slate-50 dark:bg-slate-900 overflow-hidden">
-            <header className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm flex items-center justify-between shrink-0 z-10">
+        <div className="h-[calc(100vh-64px)] flex flex-col bg-slate-50 dark:bg-[#0f1115] overflow-hidden">
+            <header className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#161a1d] shadow-sm flex items-center justify-between shrink-0 z-10">
                 <div className="flex items-center gap-4">
                     <Link to={`/groups/${board.groupId}`} className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -111,10 +138,19 @@ function BoardPage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    {/* Add members to board visually or other board actions */}
-                    <div className="flex -space-x-2 mr-4">
-                        {/* Placeholder avatars */}
-                        <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white dark:border-slate-950 flex items-center justify-center text-xs font-bold text-white">TU</div>
+                    <div className="flex -space-x-2 mr-4" title="Usuarios en este tablero">
+                        {connectedUsers.map((u, i) => (
+                            <div key={u._id || i} title={u.name} className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white dark:border-[#161a1d] flex items-center justify-center text-xs font-bold text-white overflow-hidden shadow-sm relative z-10 hover:z-20 transform hover:scale-110 transition-transform">
+                                {u.profilePicture ? (
+                                    <img src={u.profilePicture} alt={u.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span>{u.name.substring(0,2).toUpperCase()}</span>
+                                )}
+                            </div>
+                        ))}
+                        {connectedUsers.length === 0 && (
+                            <div className="w-8 h-8 rounded-full bg-slate-500 border-2 border-white dark:border-[#161a1d] flex items-center justify-center text-xs font-bold text-white">TU</div>
+                        )}
                     </div>
                 </div>
             </header>
@@ -134,7 +170,7 @@ function BoardPage() {
                         {isAddingColumn ? (
                             <form onSubmit={handleAddColumn} className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
                                 <input 
-                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0f1115] border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
                                     placeholder="Nombre de la columna"
                                     value={newColumnName}
                                     onChange={(e) => setNewColumnName(e.target.value)}
@@ -168,3 +204,4 @@ function BoardPage() {
 }
 
 export default BoardPage;
+

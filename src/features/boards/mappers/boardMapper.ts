@@ -3,7 +3,7 @@ import type { Board } from '../types/board.schema';
 
 export function toBoard(dto: BoardResponseDto): Board {
     return {
-        id: dto._id,
+        id: dto.id || (dto as any)._id,
         title: dto.title,
         description: dto.description || '',
         groupId: dto.groupId,

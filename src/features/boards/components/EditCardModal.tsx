@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useBoardDetailStore, type Card } from '../store/boardDetailStore';
+import { useGroupDetail } from '@/features/groups/hooks/useGroupDetail';
 import { socketClient } from '@/services/socket/socketClient';
 import Modal from '@/components/common/ui/Modal';
-import Input from '@/components/common/ui/Input';
 import Button from '@/components/common/ui/Button';
 
 interface EditCardModalProps {
@@ -12,7 +12,9 @@ interface EditCardModalProps {
 }
 
 export function EditCardModal({ card, isOpen, onClose }: EditCardModalProps) {
-    const { updateCard } = useBoardDetailStore();
+    const { updateCard, board } = useBoardDetailStore();
+    const { activeGroup } = useGroupDetail(board?.groupId || '');
+
     const [formData, setFormData] = useState<Partial<Card>>({});
     const [newTaskTitle, setNewTaskTitle] = useState('');
 
@@ -24,6 +26,7 @@ export function EditCardModal({ card, isOpen, onClose }: EditCardModalProps) {
                 priority: card.priority,
                 dueDate: card.dueDate ? new Date(card.dueDate).toISOString().slice(0, 10) : '',
                 tasks: card.tasks || [],
+                assignedTo: (card.assignedTo && typeof card.assignedTo === 'object') ? (card.assignedTo as any).id : (card.assignedTo || ''),
             });
         }
     }, [card]);
@@ -56,13 +59,15 @@ export function EditCardModal({ card, isOpen, onClose }: EditCardModalProps) {
         if (!card) return;
 
         const payload = { ...formData };
-        if (!payload.dueDate) delete payload.dueDate; // backend doesn't like empty string for date
+        if (!payload.dueDate) delete payload.dueDate;
+        if (!payload.assignedTo) payload.assignedTo = null as any; // to clear assignment
 
         const socket = socketClient.getSocket();
         if (socket) {
             socket.emit('card:update', {
-                paramData: { cardId: card._id },
-                cardData: payload
+                cardId: card._id,
+                columnId: card.columnId,
+                ...payload
             }, (res: any) => {
                 if (res.ok) {
                     updateCard(res.card);
@@ -76,20 +81,27 @@ export function EditCardModal({ card, isOpen, onClose }: EditCardModalProps) {
 
     if (!card) return null;
 
+    const tasks = formData.tasks || [];
+    const completedTasks = tasks.filter(t => t.completed).length;
+    const progress = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Editar Tarjeta">
             <form onSubmit={handleSubmit} className="space-y-4">
-                <Input
-                    id="title"
-                    label="Título"
-                    value={formData.title || ''}
-                    onChange={(e) => handleChange('title', e.target.value)}
-                />
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Título</label>
+                    <input
+                        required
+                        className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                        value={formData.title || ''}
+                        onChange={(e) => handleChange('title', e.target.value)}
+                    />
+                </div>
 
-                <div className="space-y-1">
-                    <label className="block text-sm font-medium text-[var(--text)]">Descripción</label>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Descripción</label>
                     <textarea 
-                        className="w-full px-4 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
+                        className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-slate-900 dark:text-white"
                         rows={3}
                         value={formData.description || ''}
                         onChange={(e) => handleChange('description', e.target.value)}
@@ -97,62 +109,76 @@ export function EditCardModal({ card, isOpen, onClose }: EditCardModalProps) {
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                        <label className="block text-sm font-medium text-[var(--text)]">Prioridad</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Asignado a</label>
                         <select
-                            className="w-full px-4 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                            value={formData.priority || 'media'}
-                            onChange={(e) => handleChange('priority', e.target.value)}
+                            className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                            value={formData.assignedTo as string || ''}
+                            onChange={(e) => handleChange('assignedTo', e.target.value)}
                         >
-                            <option value="alta">Alta</option>
-                            <option value="media">Media</option>
-                            <option value="baja">Baja</option>
+                            <option value="">-- Sin asignar --</option>
+                            {activeGroup?.members?.map(m => (
+                                <option key={m.user.id} value={m.user.id}>{m.user.name}</option>
+                            ))}
                         </select>
                     </div>
-                    
-                    <Input
-                        id="dueDate"
-                        type="date"
-                        label="Fecha de Vencimiento"
-                        value={formData.dueDate || ''}
-                        onChange={(e) => handleChange('dueDate', e.target.value)}
-                    />
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fecha de Venc.</label>
+                        <input
+                            type="date"
+                            className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                            value={formData.dueDate || ''}
+                            onChange={(e) => handleChange('dueDate', e.target.value)}
+                        />
+                    </div>
                 </div>
 
-                <div className="space-y-2 pt-2">
-                    <label className="block text-sm font-medium text-[var(--text)]">Lista de Tareas</label>
+                <div className="space-y-3 pt-2">
+                    <div className="flex justify-between items-center">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Checklist</label>
+                        <span className="text-xs font-semibold text-slate-500">{progress}%</span>
+                    </div>
                     
-                    <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
-                        {(formData.tasks || []).map((task, index) => (
-                            <div key={index} className="flex items-center gap-2 text-sm bg-[var(--background)] p-2 rounded">
+                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-2 overflow-hidden">
+                        <div className="bg-blue-500 h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                    </div>
+                    
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1 scrollbar-thin">
+                        {tasks.map((task, index) => (
+                            <div key={index} className="flex items-center gap-3 text-sm bg-slate-50 dark:bg-slate-900 p-2.5 rounded border border-transparent hover:border-slate-200 dark:hover:border-slate-700 group transition-colors">
                                 <input 
                                     type="checkbox" 
                                     checked={task.completed} 
                                     onChange={() => toggleTask(index)}
-                                    className="rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
+                                    className="rounded border-slate-300 dark:border-slate-600 text-blue-500 focus:ring-blue-500 w-4 h-4 cursor-pointer"
                                 />
-                                <span className={`flex-1 ${task.completed ? 'line-through text-[var(--text-secondary)]' : ''}`}>{task.title}</span>
-                                <button type="button" onClick={() => removeTask(index)} className="text-red-400 hover:text-red-600">&times;</button>
+                                <span className={`flex-1 transition-all ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}`}>
+                                    {task.title}
+                                </span>
+                                <button type="button" onClick={() => removeTask(index)} className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
                             </div>
                         ))}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-2">
                         <input
                             type="text"
-                            placeholder="Nueva tarea..."
-                            className="flex-1 px-3 py-1.5 text-sm bg-[var(--background)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                            placeholder="Añadir una tarea..."
+                            className="flex-1 px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white"
                             value={newTaskTitle}
                             onChange={(e) => setNewTaskTitle(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTask())}
                         />
-                        <Button type="button" size="sm" variant="outline" onClick={handleAddTask}>Añadir</Button>
+                        <Button type="button" size="sm" variant="outline" className="px-4" onClick={handleAddTask}>Añadir</Button>
                     </div>
                 </div>
 
-                <div className="pt-4 flex gap-3 justify-end border-t border-[var(--border)]">
-                    <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+                <div className="pt-4 flex gap-3 justify-end border-t border-slate-200 dark:border-slate-800 mt-6">
+                    <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
                     <Button type="submit">Guardar Cambios</Button>
                 </div>
             </form>

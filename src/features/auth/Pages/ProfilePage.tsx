@@ -67,23 +67,53 @@ export default function ProfilePage() {
         }
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0 || !user || !token) return;
+        const file = e.target.files[0];
+        setIsLoading(true);
+        setError(null);
+        setSuccessMessage(null);
+        
+        try {
+            const updatedUser = await userService.uploadProfilePicture(user.id, file);
+            setSession({ token, user: updatedUser });
+            setSuccessMessage('Foto de perfil actualizada exitosamente.');
+        } catch (err: unknown) {
+            if (err instanceof ApiError) {
+                setError(err.message);
+            } else {
+                setError('No fue posible actualizar la foto de perfil.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="max-w-2xl mx-auto p-6 space-y-8">
             <div>
                 <h1 className="text-3xl font-bold">Mi Perfil</h1>
                 <p className="text-[var(--text-secondary)] mt-2">
-                    Actualiza tu información personal.
+                    Actualiza tu información personal y foto de perfil.
                 </p>
             </div>
 
             <div className="bg-[var(--surface)] p-8 rounded-xl border border-[var(--border)] shadow-sm">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {error && <Alert variant="danger">{error}</Alert>}
-                    {successMessage && <Alert variant="success" className="bg-green-50 text-green-700 border-green-200">{successMessage}</Alert>}
+                    {successMessage && <Alert variant="success">{successMessage}</Alert>}
 
                     <div className="flex items-center gap-6 mb-8">
-                        <div className="w-20 h-20 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-3xl font-bold">
-                            {user?.name?.charAt(0).toUpperCase()}
+                        <div className="relative group w-20 h-20 rounded-full overflow-hidden bg-[var(--primary)] text-white flex items-center justify-center text-3xl font-bold cursor-pointer">
+                            {user?.profilePicture ? (
+                                <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                            ) : (
+                                <span>{user?.name?.charAt(0).toUpperCase()}</span>
+                            )}
+                            <label className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                <span className="text-xs text-white">Cambiar</span>
+                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isLoading} />
+                            </label>
                         </div>
                         <div>
                             <p className="font-medium">{user?.role === 'admin' ? 'Administrador' : 'Usuario'}</p>

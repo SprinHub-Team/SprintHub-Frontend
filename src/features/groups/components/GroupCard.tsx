@@ -9,14 +9,18 @@ function GroupCard({ group }: GroupCardProps) {
     return (
         <Link 
             to={`/groups/${group.id}`}
-            className="group block bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-500 dark:hover:border-blue-500 transition-all cursor-pointer relative overflow-hidden"
+            className="group block bg-white dark:bg-[#1d2125] p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-500 dark:hover:border-blue-500 transition-all cursor-pointer relative overflow-hidden"
         >
             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             
             <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg uppercase shadow-sm">
-                        {group.name.substring(0, 2)}
+                    <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg uppercase shadow-sm overflow-hidden">
+                        {group.profilePicture ? (
+                            <img src={group.profilePicture} alt={group.name} className="w-full h-full object-cover" />
+                        ) : (
+                            group.name.substring(0, 2)
+                        )}
                     </div>
                     <div>
                         <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
@@ -46,3 +50,4 @@ function GroupCard({ group }: GroupCardProps) {
 }
 
 export default GroupCard;
+

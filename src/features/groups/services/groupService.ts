@@ -36,3 +36,14 @@ export async function addMember(groupId: string, data: AddMemberRequestDto): Pro
     const response = await apiClient.post<ApiResponse<GroupResponseDto>>(`/groups/${groupId}/members`, data);
     return toGroup(response.data.data);
 }
+
+export async function uploadGroupPicture(groupId: string, file: File): Promise<Group> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<ApiResponse<GroupResponseDto>>(`/groups/${groupId}/profile-picture`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return toGroup(response.data.data);
+}

@@ -1,15 +1,15 @@
 export interface GroupMemberResponseDto {
     user: {
-        _id: string;
+        id: string;
         name: string;
         email: string;
     };
     role: 'admin' | 'collaborator' | 'visitor';
-    _id?: string;
+    id?: string;
 }
 
 export interface GroupResponseDto {
-    _id: string;
+    id: string;
     name: string;
     description?: string;
     ownerId: string;

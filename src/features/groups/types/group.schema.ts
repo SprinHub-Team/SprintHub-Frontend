@@ -5,6 +5,7 @@ export const groupMemberSchema = z.object({
     id: z.string(),
     name: z.string(),
     email: z.string().email(),
+    profilePicture: z.string().optional(),
   }),
   role: z.enum(['admin', 'collaborator', 'visitor']),
 });

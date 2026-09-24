@@ -11,6 +11,7 @@ export function toUser(dto: LoginUserDto): User{
         id: dto.id,
         name: dto.name,
         email: dto.email,
-        role: dto.role
+        role: dto.role,
+        profilePicture: (dto as any).profilePicture,
     };
 }

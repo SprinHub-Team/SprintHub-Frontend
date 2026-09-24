@@ -63,8 +63,43 @@ export function EditGroupModal({ group, isOpen, onClose, onUpdate }: EditGroupMo
         }
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            await groupService.uploadGroupPicture(group.id, file);
+            onUpdate();
+        } catch (err: unknown) {
+            if (err instanceof ApiError) {
+                setError(err.message);
+            } else {
+                setError('No fue posible subir la imagen del grupo.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Configuración del Grupo">
+            <div className="mb-6 flex flex-col items-center gap-3">
+                <div className="relative group w-20 h-20 rounded-xl overflow-hidden bg-blue-600 text-white flex items-center justify-center text-3xl font-bold cursor-pointer shadow-sm">
+                    {group.profilePicture ? (
+                        <img src={group.profilePicture} alt={group.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <span>{group.name.charAt(0).toUpperCase()}</span>
+                    )}
+                    <label className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <span className="text-xs text-white">Cambiar</span>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isLoading} />
+                    </label>
+                </div>
+                <p className="text-xs text-slate-500">Haz clic para cambiar la imagen</p>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && <Alert variant="danger">{error}</Alert>}
                 
@@ -101,7 +136,7 @@ export function EditGroupModal({ group, isOpen, onClose, onUpdate }: EditGroupMo
                 </div>
 
                 <div className="pt-4 flex gap-3 justify-end border-t border-[var(--border)]">
-                    <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+                    <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
                         Cancelar
                     </Button>
                     <Button type="submit" isLoading={isLoading}>

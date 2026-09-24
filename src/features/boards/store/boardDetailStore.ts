@@ -68,19 +68,21 @@ export const useBoardDetailStore = create<BoardDetailState>((set) => ({
 
     addColumn: (column) => set((state) => {
         if (!state.board) return state;
+        const mappedCol = { ...column, _id: column.id || column._id, tarjetas: column.tarjetas || column.cards || [] };
         return {
             board: {
                 ...state.board,
-                columnas: [...state.board.columnas, { ...column, tarjetas: [] }]
+                columnas: [...state.board.columnas, mappedCol]
             }
         };
     }),
     updateColumn: (column) => set((state) => {
         if (!state.board) return state;
+        const colId = column.id || column._id;
         return {
             board: {
                 ...state.board,
-                columnas: state.board.columnas.map(c => c._id === column._id ? { ...c, ...column } : c)
+                columnas: state.board.columnas.map(c => c._id === colId ? { ...c, ...column, _id: colId } : c)
             }
         };
     }),
@@ -96,12 +98,14 @@ export const useBoardDetailStore = create<BoardDetailState>((set) => ({
 
     addCard: (card) => set((state) => {
         if (!state.board) return state;
+        const mappedCard = { ...card, _id: card.id || card._id };
         return {
             board: {
                 ...state.board,
                 columnas: state.board.columnas.map(col => {
-                    if (col._id === card.columnId) {
-                        return { ...col, tarjetas: [...col.tarjetas, card] };
+                    if (col._id === mappedCard.columnId) {
+                        if (col.tarjetas.some(t => t._id === mappedCard._id)) return col;
+                        return { ...col, tarjetas: [...col.tarjetas, mappedCard] };
                     }
                     return col;
                 })
@@ -110,22 +114,21 @@ export const useBoardDetailStore = create<BoardDetailState>((set) => ({
     }),
     updateCard: (card) => set((state) => {
         if (!state.board) return state;
+        const mappedCard = { ...card, _id: card.id || card._id };
         return {
             board: {
                 ...state.board,
                 columnas: state.board.columnas.map(col => {
-                    // Si la tarjeta cambió de columna, tenemos que removerla de la antigua y agregarla a la nueva
-                    // Para simplificar, primero verificamos si la columna actualiza contiene la tarjeta
-                    const hasCard = col.tarjetas.some(t => t._id === card._id);
+                    const hasCard = col.tarjetas.some(t => t._id === mappedCard._id);
                     
-                    if (col._id === card.columnId) {
+                    if (col._id === mappedCard.columnId) {
                         if (hasCard) {
-                            return { ...col, tarjetas: col.tarjetas.map(t => t._id === card._id ? { ...t, ...card } : t) };
+                            return { ...col, tarjetas: col.tarjetas.map(t => t._id === mappedCard._id ? { ...t, ...mappedCard } : t) };
                         } else {
-                            return { ...col, tarjetas: [...col.tarjetas, card] };
+                            return { ...col, tarjetas: [...col.tarjetas, mappedCard] };
                         }
                     } else if (hasCard) {
-                        return { ...col, tarjetas: col.tarjetas.filter(t => t._id !== card._id) };
+                        return { ...col, tarjetas: col.tarjetas.filter(t => t._id !== mappedCard._id) };
                     }
                     return col;
                 })

@@ -66,11 +66,11 @@ export function BoardColumn({ column, onEditCard }: BoardColumnProps) {
         const socket = socketClient.getSocket();
         if (socket) {
             socket.emit('column:update', {
-                paramData: { columnId: column._id },
-                columnData: { name: editColumnName }
+                columnId: column._id,
+                name: editColumnName
             }, (res: any) => {
                 if (res.ok) {
-                    updateColumn(res.column);
+                    updateColumn(res.card || res.column);
                     setIsEditingTitle(false);
                 } else {
                     alert('Error al renombrar: ' + res.error);
@@ -96,8 +96,8 @@ export function BoardColumn({ column, onEditCard }: BoardColumnProps) {
         const socket = socketClient.getSocket();
         if (socket) {
             socket.emit('card:update', {
-                paramData: { cardId },
-                cardData: { columnId: column._id }
+                cardId,
+                columnId: column._id
             }, (res: any) => {
                 if (res.ok) {
                     updateCard(res.card);
@@ -110,7 +110,7 @@ export function BoardColumn({ column, onEditCard }: BoardColumnProps) {
 
     return (
         <div 
-            className="w-[300px] shrink-0 bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col max-h-full shadow-sm backdrop-blur-sm"
+            className="w-[300px] shrink-0 bg-slate-100 dark:bg-[#161a1d] rounded-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col max-h-full shadow-sm backdrop-blur-sm"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
@@ -119,7 +119,7 @@ export function BoardColumn({ column, onEditCard }: BoardColumnProps) {
                     <form onSubmit={handleUpdateColumn} className="flex-1 mr-2">
                         <input
                             autoFocus
-                            className="w-full px-2 py-1 text-sm bg-white dark:bg-slate-900 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-semibold text-slate-900 dark:text-white"
+                            className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-semibold text-slate-900 dark:text-white"
                             value={editColumnName}
                             onChange={(e) => setEditColumnName(e.target.value)}
                             onBlur={handleUpdateColumn}
@@ -155,7 +155,7 @@ export function BoardColumn({ column, onEditCard }: BoardColumnProps) {
                 {isAddingCard ? (
                     <form onSubmit={handleAddCard} className="space-y-2">
                         <textarea
-                            className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm resize-none shadow-sm"
+                            className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm resize-none shadow-sm"
                             placeholder="Título de la tarjeta"
                             value={newCardTitle}
                             onChange={(e) => setNewCardTitle(e.target.value)}
@@ -186,3 +186,4 @@ export function BoardColumn({ column, onEditCard }: BoardColumnProps) {
         </div>
     );
 }
+

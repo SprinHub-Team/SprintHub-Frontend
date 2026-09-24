@@ -14,8 +14,9 @@ import Button from "@/components/common/ui/Button";
 import { BacklogView } from "@/features/backlog/components/BacklogView";
 import { ReportsView } from "@/features/reports/components/ReportsView";
 import { TemplatesView } from "@/features/templates/components/TemplatesView";
+import { ProjectDocumentsView } from "../components/ProjectDocumentsView";
 
-type ViewMode = 'overview' | 'backlog' | 'reports' | 'templates';
+type ViewMode = 'overview' | 'backlog' | 'reports' | 'templates' | 'documents';
 
 function GroupDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -53,9 +54,9 @@ function GroupDetailPage() {
     }
 
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden animate-fade-in">
+        <div className="flex h-screen bg-slate-50 dark:bg-[#0f1115] overflow-hidden animate-fade-in">
             {/* Sidebar JIRA-like */}
-            <aside className="w-64 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+            <aside className="w-64 bg-slate-50 dark:bg-[#161a1d] border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
                 {/* Back to Dashboard Button */}
                 <div className="p-3 border-b border-slate-200 dark:border-slate-800">
                     <button 
@@ -68,8 +69,12 @@ function GroupDetailPage() {
                 </div>
 
                 <div className="p-4 flex items-center gap-3 border-b border-slate-200 dark:border-slate-800">
-                    <div className="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm">
-                        {activeGroup.name.charAt(0).toUpperCase()}
+                    <div className="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm overflow-hidden">
+                        {activeGroup.profilePicture ? (
+                            <img src={activeGroup.profilePicture} alt={activeGroup.name} className="w-full h-full object-cover" />
+                        ) : (
+                            activeGroup.name.charAt(0).toUpperCase()
+                        )}
                     </div>
                     <div className="overflow-hidden">
                         <h2 className="font-bold text-sm text-slate-900 dark:text-white truncate">{activeGroup.name}</h2>
@@ -100,6 +105,14 @@ function GroupDetailPage() {
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
                         Plantillas
+                    </button>
+
+                    <button 
+                        onClick={() => setActiveView('documents')}
+                        className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeView === 'documents' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Documentos
                     </button>
 
                     <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6 px-3">Análisis</div>
@@ -178,7 +191,7 @@ function GroupDetailPage() {
                                 ))}
                             </div>
                         ) : boards.length === 0 ? (
-                            <div className="bg-white dark:bg-slate-900/50 p-12 rounded-[var(--radius)] border border-slate-200 dark:border-slate-800 text-center shadow-inner">
+                            <div className="bg-slate-50 dark:bg-[#0f1115]/50 p-12 rounded-[var(--radius)] border border-slate-200 dark:border-slate-800 text-center shadow-inner">
                                 <p className="text-slate-500 dark:text-slate-400 mb-6 text-lg">Aún no hay tableros en este proyecto. Crea uno para comenzar.</p>
                                 <Button onClick={() => setIsCreateBoardModalOpen(true)} className="bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-900/50">Crear mi primer tablero</Button>
                             </div>
@@ -194,7 +207,7 @@ function GroupDetailPage() {
 
                         <div className="pt-8 mt-8 border-t border-slate-200 dark:border-slate-800">
                             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Equipo del Proyecto</h2>
-                            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800">
+                            <div className="bg-slate-50 dark:bg-[#0f1115] rounded-xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800">
                                 {activeGroup.members?.map((member) => (
                                     <div key={member.user?.id || Math.random()} className="p-4 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
@@ -219,6 +232,8 @@ function GroupDetailPage() {
                 {activeView === 'backlog' && id && <BacklogView groupId={id} />}
                 
                 {activeView === 'reports' && id && <ReportsView groupId={id} />}
+
+                {activeView === 'documents' && id && <ProjectDocumentsView groupId={id} />}
 
                 {activeView === 'templates' && id && (
                     <TemplatesView 
@@ -259,3 +274,4 @@ function GroupDetailPage() {
 }
 
 export default GroupDetailPage;
+

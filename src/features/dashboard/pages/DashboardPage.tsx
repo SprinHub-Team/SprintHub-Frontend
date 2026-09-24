@@ -15,9 +15,9 @@ function DashboardPage() {
     }, [fetchGroups]);
 
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden animate-fade-in">
+        <div className="flex h-screen bg-slate-50 dark:bg-[#0f1115] overflow-hidden animate-fade-in">
             {/* Global Sidebar */}
-            <aside className="w-64 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+            <aside className="w-64 bg-white dark:bg-[#161a1d] border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
                 <div className="p-4 flex items-center gap-3 border-b border-slate-200 dark:border-slate-800">
                     <div className="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm">
                         S
@@ -107,7 +107,7 @@ function DashboardPage() {
                                 ))}
                             </div>
                         ) : groups.length === 0 ? (
-                            <div className="bg-white dark:bg-slate-900/50 p-12 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-inner">
+                            <div className="bg-white dark:bg-[#0f1115]/50 p-12 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-inner">
                                 <p className="text-slate-500 dark:text-slate-400 mb-6 text-lg">Aún no perteneces a ningún grupo.</p>
                                 <Link to="/groups">
                                     <Button className="bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-900/50">Crear mi primer grupo</Button>
@@ -131,7 +131,7 @@ function DashboardPage() {
                                 Actividad Reciente
                             </h2>
                         </div>
-                        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 text-center text-slate-500 dark:text-slate-400">
+                        <div className="bg-white dark:bg-[#0f1115] p-8 rounded-2xl border border-slate-200 dark:border-slate-800 text-center text-slate-500 dark:text-slate-400">
                             Pronto podrás ver tu actividad reciente aquí.
                         </div>
                     </section>
@@ -142,3 +142,4 @@ function DashboardPage() {
 }
 
 export default DashboardPage;
+

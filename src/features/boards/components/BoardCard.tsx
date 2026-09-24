@@ -9,7 +9,7 @@ function BoardCard({ board }: BoardCardProps) {
     return (
         <Link 
             to={`/boards/${board.id}`}
-            className="group block bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-500 dark:hover:border-blue-500 transition-all cursor-pointer relative overflow-hidden"
+            className="group block bg-white dark:bg-[#1d2125] p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-500 dark:hover:border-blue-500 transition-all cursor-pointer relative overflow-hidden"
         >
             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             
@@ -36,3 +36,4 @@ function BoardCard({ board }: BoardCardProps) {
 }
 
 export default BoardCard;
+
