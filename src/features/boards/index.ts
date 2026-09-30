@@ -1,0 +1,11 @@
+export { BoardWorkspace } from './components/BoardWorkspace';
+export { BoardListItem } from './components/BoardListItem';
+export { GroupBoardList } from './components/GroupBoardList';
+export { CreateBoardModal } from './components/CreateBoardModal';
+export { useBoards } from './hooks/useBoards';
+export { useCreateBoard, useDeleteBoard, useBoardTemplates } from './hooks/useBoardMutations';
+export { useActiveBoard, useRealtimeStatus } from './hooks/useActiveBoard';
+export { useActiveBoardStore } from './store/useActiveBoardStore';
+export type { ActiveBoardStatus } from './store/useActiveBoardStore';
+export type { Board, BoardDetails, BoardTemplate } from './types/board.types';
+export type { CreateBoardFormData } from './schemas/boardFormSchema';
