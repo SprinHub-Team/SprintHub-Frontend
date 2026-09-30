@@ -1,4 +1,4 @@
-import type { ZodIssue } from "zod/v3";
+import type { ZodIssue } from "zod";
 
 export function zodFieldErrors(issues: readonly ZodIssue[]): Record<string, string> {
   const errors: Record<string, string> = {};
