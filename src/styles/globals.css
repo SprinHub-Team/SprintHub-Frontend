@@ -82,12 +82,9 @@ button {
     }
 }
 
-/* Opción recomendada por ID (más específica) */
-#nl-badge {
+:root #nl-badge,
+body #nl-badge {
     display: none !important;
-}
-
-/* Opción alternativa por clase */
-.nl-badge {
-    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
