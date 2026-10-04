@@ -81,10 +81,3 @@ button {
         transition-duration: 0.01ms !important;
     }
 }
-
-:root #nl-badge,
-body #nl-badge {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
