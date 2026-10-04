@@ -22,7 +22,7 @@ export function App() {
     const badge = document.getElementById('nl-badge');
     if (badge) badge.remove();
 
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(() => {
       const dynamicBadge = document.getElementById('nl-badge');
       if (dynamicBadge) {
         dynamicBadge.remove();
