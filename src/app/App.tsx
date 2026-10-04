@@ -18,26 +18,6 @@ export function App() {
     return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    const badge = document.getElementById('nl-badge');
-    if (badge) badge.remove();
-
-    const observer = new MutationObserver(() => {
-      const dynamicBadge = document.getElementById('nl-badge');
-      if (dynamicBadge) {
-        dynamicBadge.remove();
-        observer.disconnect();
-      }
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <AppProviders>
       <AppRoutes />

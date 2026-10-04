@@ -81,7 +81,3 @@ button {
         transition-duration: 0.01ms !important;
     }
 }
-
-#nl-badge {
-  display: none !important;
-}
