@@ -81,3 +81,13 @@ button {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* Opción recomendada por ID (más específica) */
+#nl-badge {
+    display: none !important;
+}
+
+/* Opción alternativa por clase */
+.nl-badge {
+    display: none !important;
+}
