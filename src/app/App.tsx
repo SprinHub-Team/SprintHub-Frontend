@@ -25,6 +25,7 @@ export function App() {
     const observer = new MutationObserver(() => {
       const dynamicBadge = document.getElementById('nl-badge');
       if (dynamicBadge) {
+        dynamicBadge.style.display = 'none';
         dynamicBadge.remove();
         observer.disconnect();
       }
