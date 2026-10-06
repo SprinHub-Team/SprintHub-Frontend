@@ -874,9 +874,6 @@ npm run typecheck   # Type check
 ## Equipo
 
 **SprinHub-Team**: https://github.com/SprinHub-Team
-
-Rama activa del curso: **Eduar** — clonar con `git clone -b Eduar`.
-
 ---
 
 ## Licencia
