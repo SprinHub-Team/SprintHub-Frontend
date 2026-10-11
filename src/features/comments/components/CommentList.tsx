@@ -33,9 +33,18 @@ export function CommentList({ comments, sessionUserId, onDelete, deleting }: Com
             <div className="flex min-w-0 items-center gap-2.5">
               <span
                 aria-hidden="true"
-                className="flex size-7 shrink-0 items-center justify-center rounded-full border border-(--border-light) bg-(image:--gradient-main) text-[11px] font-bold text-(--brown)"
+                className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-(--border-light) bg-(image:--gradient-main) text-[11px] font-bold text-(--brown)"
               >
-                {comment.createdBy.name.slice(0, 2).toUpperCase()}
+                {comment.createdBy.profilePicture ? (
+                  <img
+                    src={comment.createdBy.profilePicture}
+                    alt=""
+                    loading="lazy"
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  comment.createdBy.name.slice(0, 2).toUpperCase()
+                )}
               </span>
               <div className="flex min-w-0 flex-col">
                 <span className="truncate text-sm font-medium text-(--text-on-dark)">

@@ -115,3 +115,20 @@ export async function removeGroupMember(groupId: string, userId: string): Promis
     throw errorHandler(error);
   }
 }
+
+export async function updateGroupMemberRole(
+  groupId: string,
+  userId: string,
+  role: GroupMemberRole,
+): Promise<GroupDetails> {
+  try {
+    const response = await apiClient.put<unknown>(`/groups/${groupId}/members/${userId}`, { role });
+    const result = groupDetailsEnvelopeSchema.safeParse(response.data);
+    if (!result.success) {
+      throw new z.ZodError(result.error.issues);
+    }
+    return result.data.data;
+  } catch (error: unknown) {
+    throw errorHandler(error);
+  }
+}

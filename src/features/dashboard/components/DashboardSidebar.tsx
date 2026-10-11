@@ -7,6 +7,7 @@ import { CreateGroupModal } from '@/features/groups/components/CreateGroupModal'
 import { GroupMembersModal } from '@/features/groups/components/GroupMembersModal';
 import { WorkspaceGroupItem } from '@/features/groups/components/WorkspaceGroupItem';
 import { useGroupsStore } from '@/features/groups/store/useGroupsStore';
+import { useDeleteGroup } from '@/features/groups/hooks/useGroupMutations';
 import { CreateBoardModal } from '@/features/boards/components/CreateBoardModal';
 import { GroupBoardList } from '@/features/boards/components/GroupBoardList';
 import { DocumentsModal } from '@/features/documents/components/DocumentsModal';
@@ -36,6 +37,7 @@ export function DashboardSidebar() {
   const [createBoardGroupId, setCreateBoardGroupId] = useState<string | null>(null);
   const [documentsGroupId, setDocumentsGroupId] = useState<string | null>(null);
   const [editGroupId, setEditGroupId] = useState<string | null>(null);
+  const deleteGroupMutation = useDeleteGroup();
 
   const sessionUserId = session?.user.id ?? null;
   const membersGroup = groups.find((group) => group.id === membersGroupId) ?? null;
@@ -65,6 +67,18 @@ export function DashboardSidebar() {
     if (selectedBoardId === boardId) {
       useDashboardStore.getState().clearBoard();
     }
+  };
+
+  const handleDeleteGroup = (groupId: string) => {
+    if (membersGroupId === groupId) setMembersGroupId(null);
+    if (documentsGroupId === groupId) setDocumentsGroupId(null);
+    if (editGroupId === groupId) setEditGroupId(null);
+    if (createBoardGroupId === groupId) setCreateBoardGroupId(null);
+    void deleteGroupMutation.submit(groupId).then((succeeded) => {
+      if (succeeded) {
+        removeGroupFromDashboard(groupId);
+      }
+    });
   };
 
   return (
@@ -129,6 +143,9 @@ export function DashboardSidebar() {
                 onOpenMembers={() => setMembersGroupId(group.id)}
                 onOpenDocuments={() => setDocumentsGroupId(group.id)}
                 onEdit={() => setEditGroupId(group.id)}
+                canDeleteGroup={isAdminOf(group.id)}
+                onDeleteGroup={() => handleDeleteGroup(group.id)}
+                deletingGroup={deleteGroupMutation.loading}
               >
                 <GroupBoardList
                   groupId={group.id}
@@ -210,8 +227,7 @@ export function DashboardSidebar() {
         open={membersGroupId !== null}
         onClose={() => setMembersGroupId(null)}
         group={membersGroup}
-        canDeleteGroup={membersGroupId !== null && isAdminOf(membersGroupId)}
-        onDeleteGroup={(groupId) => removeGroupFromDashboard(groupId)}
+        canManageMembers={membersGroupId !== null && isAdminOf(membersGroupId)}
       />
 
       <DocumentsModal

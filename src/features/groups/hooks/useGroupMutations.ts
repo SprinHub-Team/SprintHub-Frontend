@@ -1,8 +1,14 @@
 import { useCallback, useState } from 'react';
 import { useToast } from '@/components/ui/Toast/Toast';
 import { errorHandler } from '@/services/api/errors/errorHandler';
-import { deleteGroup, removeGroupMember } from '../services/groupService';
+import { deleteGroup, removeGroupMember, updateGroupMemberRole } from '../services/groupService';
+import type { GroupMemberRole } from '../types/group.types';
 import { useGroupsStore } from '../store/useGroupsStore';
+
+const ROLE_CHANGE_TOASTS: Record<GroupMemberRole, string> = {
+  admin: 'Ahora es administrador',
+  collaborator: 'Ahora es colaborador',
+};
 
 export function useDeleteGroup() {
   const [loading, setLoading] = useState(false);
@@ -47,6 +53,33 @@ export function useRemoveGroupMember() {
       } catch (caught: unknown) {
         const apiError = errorHandler(caught);
         toast.error(apiError.message, 'No se pudo retirar el miembro');
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [upsertGroup, toast],
+  );
+
+  return { loading, submit };
+}
+
+export function useUpdateGroupMemberRole() {
+  const [loading, setLoading] = useState(false);
+  const upsertGroup = useGroupsStore((state) => state.upsertGroup);
+  const toast = useToast();
+
+  const submit = useCallback(
+    async (groupId: string, userId: string, role: GroupMemberRole): Promise<boolean> => {
+      setLoading(true);
+      try {
+        const group = await updateGroupMemberRole(groupId, userId, role);
+        upsertGroup(group);
+        toast.success('Rol del miembro actualizado', ROLE_CHANGE_TOASTS[role]);
+        return true;
+      } catch (caught: unknown) {
+        const apiError = errorHandler(caught);
+        toast.error(apiError.message, 'No se pudo actualizar el rol');
         return false;
       } finally {
         setLoading(false);

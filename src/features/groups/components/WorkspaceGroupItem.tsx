@@ -1,4 +1,5 @@
-import { ChevronDown, ChevronRight, FileText, Pencil, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronRight, FileText, Pencil, Trash2, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { GroupDetails } from '../types/group.types';
 
@@ -10,6 +11,9 @@ export interface WorkspaceGroupItemProps {
   onOpenMembers: () => void;
   onOpenDocuments: () => void;
   onEdit: () => void;
+  canDeleteGroup?: boolean;
+  onDeleteGroup?: () => void;
+  deletingGroup?: boolean;
   children?: React.ReactNode;
 }
 
@@ -21,8 +25,28 @@ export function WorkspaceGroupItem({
   onOpenMembers,
   onOpenDocuments,
   onEdit,
+  canDeleteGroup = false,
+  onDeleteGroup,
+  deletingGroup = false,
   children,
 }: WorkspaceGroupItemProps) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  useEffect(() => {
+    if (!confirmingDelete) return undefined;
+    const timer = setTimeout(() => setConfirmingDelete(false), 3500);
+    return () => clearTimeout(timer);
+  }, [confirmingDelete]);
+
+  const handleDeleteClick = () => {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      return;
+    }
+    setConfirmingDelete(false);
+    onDeleteGroup?.();
+  };
+
   return (
     <li className="flex flex-col">
       <div
@@ -85,10 +109,32 @@ export function WorkspaceGroupItem({
           onClick={onEdit}
           title="Editar grupo"
           aria-label={`Editar ${group.name}`}
-          className="mr-1 flex shrink-0 items-center rounded-(--radius-sm) p-1 text-(--taupe) transition-colors duration-200 ease-out hover:bg-(--ink-soft) hover:text-(--cream)"
+          className="mr-0.5 flex shrink-0 items-center rounded-(--radius-sm) p-1 text-(--taupe) transition-colors duration-200 ease-out hover:bg-(--ink-soft) hover:text-(--cream)"
         >
           <Pencil aria-hidden="true" className="size-3" />
         </button>
+        {canDeleteGroup && onDeleteGroup ? (
+          <button
+            type="button"
+            onClick={handleDeleteClick}
+            disabled={deletingGroup}
+            title={
+              confirmingDelete
+                ? 'Confirmar eliminación: se borrarán sus tableros, columnas y tarjetas'
+                : 'Eliminar grupo'
+            }
+            aria-label={`Eliminar ${group.name}`}
+            className={cn(
+              'mr-1 flex shrink-0 items-center gap-1 rounded-(--radius-sm) p-1 transition-colors duration-200 ease-out disabled:opacity-50',
+              confirmingDelete
+                ? 'border border-(--border-dark) bg-(--brown) px-2 py-1 text-[10px] font-semibold text-(--paper)'
+                : 'text-(--taupe) hover:bg-(--ink-soft) hover:text-(--cream)',
+            )}
+          >
+            <Trash2 aria-hidden="true" className="size-3" />
+            {confirmingDelete ? 'Confirmar' : null}
+          </button>
+        ) : null}
       </div>
 
       {expanded ? (

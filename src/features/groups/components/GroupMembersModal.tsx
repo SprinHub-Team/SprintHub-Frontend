@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Trash2, UserPlus, Users } from 'lucide-react';
+import { useCallback, useState, type FormEvent } from 'react';
+import { UserPlus, Users } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert/Alert';
 import { Badge } from '@/components/ui/Badge/Badge';
 import { Button } from '@/components/ui/Button/Button';
@@ -7,14 +7,13 @@ import { Input } from '@/components/ui/Input/Input';
 import { Modal } from '@/components/ui/Modal/Modal';
 import type { GroupDetails, GroupMemberRole } from '../types/group.types';
 import { useAddGroupMember } from '../hooks/useAddGroupMember';
-import { useDeleteGroup, useRemoveGroupMember } from '../hooks/useGroupMutations';
+import { useRemoveGroupMember, useUpdateGroupMemberRole } from '../hooks/useGroupMutations';
 
 export interface GroupMembersModalProps {
   open: boolean;
   onClose: () => void;
   group: GroupDetails | null;
-  canDeleteGroup?: boolean;
-  onDeleteGroup?: (groupId: string) => void;
+  canManageMembers?: boolean;
 }
 
 const ROLE_LABELS: Record<GroupMemberRole, string> = {
@@ -26,26 +25,17 @@ export function GroupMembersModal({
   open,
   onClose,
   group,
-  canDeleteGroup = false,
-  onDeleteGroup,
+  canManageMembers = false,
 }: GroupMembersModalProps) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<GroupMemberRole>('collaborator');
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const addMember = useAddGroupMember();
   const removeMember = useRemoveGroupMember();
-  const deleteGroup = useDeleteGroup();
-
-  useEffect(() => {
-    if (!confirmingDelete) return undefined;
-    const timer = setTimeout(() => setConfirmingDelete(false), 3500);
-    return () => clearTimeout(timer);
-  }, [confirmingDelete]);
+  const updateRole = useUpdateGroupMemberRole();
 
   const handleClose = useCallback(() => {
-  setConfirmingDelete(false);
-  setEmail('');
-  onClose();
+    setEmail('');
+    onClose();
   }, [onClose]);
 
   const fieldErrors: Record<string, string> =
@@ -62,18 +52,9 @@ export function GroupMembersModal({
     }
   };
 
-  const handleDeleteGroup = () => {
+  const handleRoleChange = (memberId: string, nextRole: GroupMemberRole) => {
     if (!group) return;
-    if (!confirmingDelete) {
-      setConfirmingDelete(true);
-      return;
-    }
-    void deleteGroup.submit(group.id).then((succeeded) => {
-      if (succeeded) {
-        onDeleteGroup?.(group.id);
-        handleClose();
-      }
-    });
+    void updateRole.submit(group.id, memberId, nextRole);
   };
 
   return (
@@ -150,9 +131,23 @@ export function GroupMembersModal({
                   <span className="truncate text-xs text-(--text-muted)">{member.email}</span>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Badge tone={member.role === 'admin' ? 'outline' : 'neutral'}>
-                    {ROLE_LABELS[member.role]}
-                  </Badge>
+                  {canManageMembers ? (
+                    <select
+                      value={member.role}
+                      onChange={(event) => handleRoleChange(member.id, event.target.value as GroupMemberRole)}
+                      disabled={updateRole.loading}
+                      aria-label={`Rol de ${member.name}`}
+                      title="Cambiar rol del miembro"
+                      className="h-8 cursor-pointer rounded-(--radius-sm) border border-(--border-subtle) bg-(--ink-raised) px-2 text-xs text-(--text-on-dark) transition-colors duration-200 ease-out hover:border-(--border-dark) focus:border-(--sand) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--sand) disabled:opacity-50"
+                    >
+                      <option value="collaborator">Colaborador</option>
+                      <option value="admin">Administrador</option>
+                    </select>
+                  ) : (
+                    <Badge tone={member.role === 'admin' ? 'outline' : 'neutral'}>
+                      {ROLE_LABELS[member.role]}
+                    </Badge>
+                  )}
                   <button
                     type="button"
                     onClick={() => group && removeMember.submit(group.id, member.id)}
@@ -166,26 +161,6 @@ export function GroupMembersModal({
             ))}
           </ul>
         </div>
-
-        {canDeleteGroup && onDeleteGroup ? (
-          <div className="flex flex-col gap-2 border-t border-(--border-subtle) pt-4">
-            <Button
-              variant={confirmingDelete ? 'danger' : 'ghost'}
-              size="sm"
-              loading={deleteGroup.loading}
-              onClick={handleDeleteGroup}
-              icon={<Trash2 aria-hidden="true" className="size-4" />}
-              className={confirmingDelete ? undefined : 'self-start text-(--taupe) hover:text-(--cream)'}
-            >
-              {confirmingDelete ? 'Confirmar eliminación del grupo' : 'Eliminar grupo'}
-            </Button>
-            {confirmingDelete ? (
-              <p className="text-xs text-(--text-muted)">
-                Se eliminarán también sus tableros, columnas y tarjetas.
-              </p>
-            ) : null}
-          </div>
-        ) : null}
       </div>
     </Modal>
   );
