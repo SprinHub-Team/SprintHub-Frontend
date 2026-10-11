@@ -775,8 +775,8 @@ navigateTo(APP_ROUTES.dashboard);  // Redirige a /#/dashboard
 ### Persistencia de sesión
 
 - **Token**: guardado en `sessionStorage` (no sobrevive a cierre de pestaña)
-- **User object**: guardado en `useAuthStore` con `persist` middleware → localStorage
-- En recarga: `useAuthStore` se rehidrata desde localStorage; si no hay token, `ProtectedRoute` redirige
+- **User object**: guardado en `useAuthStore` con `persist` middleware → sessionStorage
+- En recarga: `useAuthStore` se rehidrata desde sessionStorage; si no hay token, `ProtectedRoute` redirige
 
 ---
 
