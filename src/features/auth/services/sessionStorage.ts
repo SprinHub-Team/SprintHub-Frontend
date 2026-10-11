@@ -4,18 +4,18 @@ import type { AuthSession } from '../types/auth.types';
 const STORAGE_KEY = 'sprinthub_auth';
 
 function isBrowser(): boolean {
-  return typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined';
+  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 }
 
 export function saveSession(session: AuthSession): void {
   if (!isBrowser()) return;
-  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 }
 
 export function readSession(): AuthSession | null {
   if (!isBrowser()) return null;
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
     const result = authSessionSchema.safeParse(parsed);
@@ -32,5 +32,5 @@ export function readSession(): AuthSession | null {
 
 export function clearSession(): void {
   if (!isBrowser()) return;
-  window.sessionStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(STORAGE_KEY);
 }

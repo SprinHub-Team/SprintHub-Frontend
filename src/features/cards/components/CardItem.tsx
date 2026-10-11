@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp, Minus, MessageSquare, Paperclip, UserRound } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge/Badge';
+import { UserAvatar } from './UserAvatar';
 import type { Card, CardPriority } from '../types/card.types';
 
 const PRIORITY_META: Record<CardPriority, { label: string; icon: typeof ArrowUp }> = {
@@ -62,12 +63,11 @@ export function CardItem({ card, onOpen }: CardItemProps) {
         </span>
         {card.assignedTo ? (
           <span className="flex items-center gap-1.5 text-(--cream)">
-            <span
-              aria-hidden="true"
-              className="flex size-5 items-center justify-center rounded-full border border-(--border-light) bg-(image:--gradient-main) text-[10px] font-bold text-(--brown)"
-            >
-              {initials(card.assignedTo.name)}
-            </span>
+            <UserAvatar
+              profilePicture={card.assignedTo.profilePicture}
+              name={card.assignedTo.name}
+              className="size-5 text-[10px]"
+            />
             <span className="sr-only">Asignada a {card.assignedTo.name}</span>
             <span aria-hidden="true" className="max-w-28 truncate">
               {card.assignedTo.name}
@@ -82,13 +82,4 @@ export function CardItem({ card, onOpen }: CardItemProps) {
       </div>
     </button>
   );
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter((part) => part.length > 0)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
 }

@@ -2,6 +2,7 @@ import { KanbanSquare, LayoutGrid, Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button/Button';
 import { EmptyState } from '@/components/ui/EmptyState/EmptyState';
 import { BoardWorkspace } from '@/features/boards/components/BoardWorkspace';
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import type { GroupDetails } from '@/features/groups/types/group.types';
 import { useDashboardStore } from '../store/useDashboardStore';
 
@@ -19,7 +20,12 @@ export function DashboardMainArea({
   onCreateGroup,
 }: DashboardMainAreaProps) {
   const setMobileSidebarOpen = useDashboardStore((state) => state.setMobileSidebarOpen);
+  const sessionUserId = useAuthStore((state) => state.session?.user.id ?? null);
   const selectedGroup = groups.find((group) => group.id === selectedGroupId) ?? null;
+  const isAdminOfSelectedGroup =
+    selectedGroup?.members.some(
+      (member) => member.id === sessionUserId && member.role === 'admin',
+    ) ?? false;
 
   if (groups.length === 0) {
     return (
@@ -76,6 +82,7 @@ export function DashboardMainArea({
       <BoardWorkspace
         boardId={selectedBoardId}
         members={selectedGroup?.members ?? []}
+        canManageCards={isAdminOfSelectedGroup}
       />
     </div>
   );

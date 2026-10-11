@@ -28,9 +28,10 @@ import type { Card } from '@/features/cards/types/card.types';
 export interface BoardWorkspaceProps {
   boardId: string;
   members: GroupMemberDto[];
+  canManageCards?: boolean;
 }
 
-export function BoardWorkspace({ boardId, members }: BoardWorkspaceProps) {
+export function BoardWorkspace({ boardId, members, canManageCards = false }: BoardWorkspaceProps) {
   const { board, status, error } = useActiveBoard(boardId);
   const realtimeStatus = useRealtimeStatus();
   const [openCardId, setOpenCardId] = useState<string | null>(null);
@@ -136,6 +137,7 @@ export function BoardWorkspace({ boardId, members }: BoardWorkspaceProps) {
         columns={board.columns}
         members={members}
         onClose={() => setOpenCardId(null)}
+        canDeleteCard={canManageCards}
       />
     </div>
   );

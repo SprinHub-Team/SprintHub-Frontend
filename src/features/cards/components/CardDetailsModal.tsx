@@ -15,6 +15,7 @@ import { useCommentMutations } from '@/features/comments/hooks/useCommentMutatio
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { useCardMutations } from '../hooks/useCardMutations';
 import { CardFilesSection } from './CardFilesSection';
+import { UserAvatar } from './UserAvatar';
 import type { CardPriority } from '../types/card.types';
 
 export interface CardDetailsModalProps {
@@ -22,6 +23,7 @@ export interface CardDetailsModalProps {
   columns: BoardColumn[];
   members: GroupMemberDto[];
   onClose: () => void;
+  canDeleteCard?: boolean;
 }
 
 interface EditValues {
@@ -32,7 +34,7 @@ interface EditValues {
   columnId: string;
 }
 
-export function CardDetailsModal({ cardId, columns, members, onClose }: CardDetailsModalProps) {
+export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteCard = false }: CardDetailsModalProps) {
   const card = useActiveBoardStore((state) => {
     if (!state.board) return null;
     for (const column of state.board.columns) {
@@ -219,7 +221,18 @@ export function CardDetailsModal({ cardId, columns, members, onClose }: CardDeta
                   Prioridad {card.priority}
                 </Badge>
                 {card.assignedTo ? (
-                  <Badge tone="muted">Responsable: {card.assignedTo.name}</Badge>
+                  <Badge
+                    tone="muted"
+                    icon={
+                      <UserAvatar
+                        profilePicture={card.assignedTo.profilePicture}
+                        name={card.assignedTo.name}
+                        className="size-4 text-[9px]"
+                      />
+                    }
+                  >
+                    Responsable: {card.assignedTo.name}
+                  </Badge>
                 ) : (
                   <Badge tone="muted">Sin responsable</Badge>
                 )}
@@ -234,15 +247,17 @@ export function CardDetailsModal({ cardId, columns, members, onClose }: CardDeta
               )}
 
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={handleDelete}
-                  loading={loading}
-                  icon={<Trash2 aria-hidden="true" className="size-4" />}
-                >
-                  Eliminar tarjeta
-                </Button>
+                {canDeleteCard ? (
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={handleDelete}
+                    loading={loading}
+                    icon={<Trash2 aria-hidden="true" className="size-4" />}
+                  >
+                    Eliminar tarjeta
+                  </Button>
+                ) : null}
                 <Button
                   variant="secondary"
                   size="sm"

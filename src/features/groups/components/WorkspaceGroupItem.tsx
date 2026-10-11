@@ -11,6 +11,7 @@ export interface WorkspaceGroupItemProps {
   onOpenMembers: () => void;
   onOpenDocuments: () => void;
   onEdit: () => void;
+  canEditGroup?: boolean;
   canDeleteGroup?: boolean;
   onDeleteGroup?: () => void;
   deletingGroup?: boolean;
@@ -25,6 +26,7 @@ export function WorkspaceGroupItem({
   onOpenMembers,
   onOpenDocuments,
   onEdit,
+  canEditGroup = false,
   canDeleteGroup = false,
   onDeleteGroup,
   deletingGroup = false,
@@ -104,15 +106,17 @@ export function WorkspaceGroupItem({
           <Users aria-hidden="true" className="size-3" />
           {group.members.length}
         </button>
-        <button
-          type="button"
-          onClick={onEdit}
-          title="Editar grupo"
-          aria-label={`Editar ${group.name}`}
-          className="mr-0.5 flex shrink-0 items-center rounded-(--radius-sm) p-1 text-(--taupe) transition-colors duration-200 ease-out hover:bg-(--ink-soft) hover:text-(--cream)"
-        >
-          <Pencil aria-hidden="true" className="size-3" />
-        </button>
+        {canEditGroup ? (
+          <button
+            type="button"
+            onClick={onEdit}
+            title="Editar grupo"
+            aria-label={`Editar ${group.name}`}
+            className="mr-0.5 flex shrink-0 items-center rounded-(--radius-sm) p-1 text-(--taupe) transition-colors duration-200 ease-out hover:bg-(--ink-soft) hover:text-(--cream)"
+          >
+            <Pencil aria-hidden="true" className="size-3" />
+          </button>
+        ) : null}
         {canDeleteGroup && onDeleteGroup ? (
           <button
             type="button"

@@ -143,6 +143,7 @@ export function DashboardSidebar() {
                 onOpenMembers={() => setMembersGroupId(group.id)}
                 onOpenDocuments={() => setDocumentsGroupId(group.id)}
                 onEdit={() => setEditGroupId(group.id)}
+                canEditGroup={isAdminOf(group.id)}
                 canDeleteGroup={isAdminOf(group.id)}
                 onDeleteGroup={() => handleDeleteGroup(group.id)}
                 deletingGroup={deleteGroupMutation.loading}
@@ -227,7 +228,6 @@ export function DashboardSidebar() {
         open={membersGroupId !== null}
         onClose={() => setMembersGroupId(null)}
         group={membersGroup}
-        canManageMembers={membersGroupId !== null && isAdminOf(membersGroupId)}
       />
 
       <DocumentsModal
