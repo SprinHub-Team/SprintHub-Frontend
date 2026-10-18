@@ -1,0 +1,93 @@
+.section {
+  width: 100%;
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: 64px 16px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+  background-image: var(--gradient-main);
+  padding: 56px 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.title {
+  margin: 0;
+  max-width: 672px;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--brown);
+}
+
+.description {
+  margin: 0;
+  max-width: 576px;
+  font-size: 16px;
+  line-height: 1.625;
+  color: rgba(54, 36, 24, 0.8);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Botones sobre fondo claro (gradiente) */
+
+.primaryOnLight {
+  border-color: var(--brown);
+  background: var(--brown);
+  color: var(--paper);
+}
+
+.primaryOnLight:hover:not(:disabled) {
+  border-color: var(--brown);
+  background: rgba(54, 36, 24, 0.9);
+  color: var(--paper);
+}
+
+.ghostOnLight {
+  color: var(--brown);
+}
+
+.ghostOnLight:hover:not(:disabled) {
+  background: rgba(54, 36, 24, 0.1);
+  color: var(--brown);
+}
+
+@media (min-width: 640px) {
+  .section {
+    padding: 64px 24px;
+  }
+
+  .card {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .actions {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+}

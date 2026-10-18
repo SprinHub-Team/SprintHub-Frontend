@@ -1,0 +1,28 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.switch {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.switchAction {
+  border: none;
+  padding: 0;
+  background: none;
+  font-weight: 600;
+  color: var(--cream);
+  text-decoration: underline;
+  text-decoration-color: var(--taupe);
+  text-underline-offset: 4px;
+  transition: color var(--transition);
+}
+
+.switchAction:hover {
+  color: var(--sand);
+}

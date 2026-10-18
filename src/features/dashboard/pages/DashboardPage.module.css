@@ -1,0 +1,77 @@
+.page {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.content {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.mobileHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--ink-raised);
+  padding: 12px 16px;
+}
+
+.mobileMenuButton {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  background: none;
+  color: var(--text-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.mobileMenuButton:hover {
+  background: var(--ink-soft);
+  color: var(--text-on-dark);
+}
+
+.mobileBrandIcon {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  background-image: var(--gradient-main);
+  color: var(--brown);
+}
+
+.mobileBrandName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-on-dark);
+}
+
+.main {
+  min-height: 0;
+  flex: 1;
+}
+
+.centered {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.bounded {
+  max-width: 512px;
+}
+
+@media (min-width: 768px) {
+  .mobileHeader {
+    display: none;
+  }
+}

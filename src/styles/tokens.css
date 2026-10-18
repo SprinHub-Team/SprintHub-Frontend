@@ -1,0 +1,132 @@
+:root {
+    --paper: #FFFBFF;
+    --paper-soft: #FFFBFF;
+
+    --ink: #000501;
+    --ink-soft: #040400;
+
+    --cream: #F6E5D3;
+    --sand: #F1DAC0;
+    --taupe: #93827B;
+    --brown: #362418;
+
+    --paper-warm: color-mix(in srgb, #F6E5D3 9%, #FFFBFF);
+    --paper-cream: color-mix(in srgb, #F6E5D3 22%, #FFFBFF);
+
+    --cream-50: color-mix(in srgb, #F6E5D3 35%, #FFFBFF);
+    --cream-100: color-mix(in srgb, #F6E5D3 60%, #FFFBFF);
+    --cream-300: color-mix(in srgb, #F6E5D3 80%, #F1DAC0);
+    --sand-50: color-mix(in srgb, #F1DAC0 35%, #FFFBFF);
+    --sand-100: color-mix(in srgb, #F1DAC0 60%, #FFFBFF);
+    --sand-300: color-mix(in srgb, #F1DAC0 82%, #93827B);
+
+    --taupe-100: color-mix(in srgb, #93827B 14%, #FFFBFF);
+    --taupe-200: color-mix(in srgb, #93827B 28%, #FFFBFF);
+    --taupe-300: color-mix(in srgb, #93827B 48%, #FFFBFF);
+    --taupe-400: color-mix(in srgb, #93827B 70%, #F6E5D3);
+    --taupe-600: color-mix(in srgb, #93827B 68%, #362418);
+    --taupe-700: color-mix(in srgb, #93827B 42%, #040400);
+    --taupe-800: color-mix(in srgb, #93827B 24%, #040400);
+    --taupe-900: color-mix(in srgb, #93827B 12%, #000501);
+
+    --brown-100: color-mix(in srgb, #362418 14%, #FFFBFF);
+    --brown-200: color-mix(in srgb, #362418 30%, #FFFBFF);
+    --brown-300: color-mix(in srgb, #362418 55%, #FFFBFF);
+    --brown-500: color-mix(in srgb, #362418 85%, #93827B);
+    --brown-600: color-mix(in srgb, #362418 78%, #93827B);
+    --brown-700: color-mix(in srgb, #362418 60%, #000501);
+
+    --ink-600: color-mix(in srgb, #93827B 30%, #000501);
+    --ink-700: color-mix(in srgb, #93827B 18%, #000501);
+    --ink-800: color-mix(in srgb, #93827B 12%, #000501);
+    --ink-raised: color-mix(in srgb, #93827B 12%, #000501);
+    --ink-900: color-mix(in srgb, #93827B 6%, #000501);
+    --ink-hover: color-mix(in srgb, #93827B 20%, #000501);
+
+    --text-on-light: #362418;
+    --text-on-light-muted: color-mix(in srgb, #93827B 78%, #362418);
+    --text-on-dark: #FFFBFF;
+    --text-on-dark-muted: color-mix(in srgb, #93827B 55%, #FFFBFF);
+    --text-muted: #93827B;
+    --text-cream: #F6E5D3;
+    --text-sand: #F1DAC0;
+
+    --border-light: #F1DAC0;
+    --border-light-soft: color-mix(in srgb, #F1DAC0 55%, #FFFBFF);
+    --border-dark: #93827B;
+    --border-subtle: rgba(147, 130, 123, 0.35);
+    --border-subtle-soft: rgba(147, 130, 123, 0.2);
+    --border-strong: color-mix(in srgb, #93827B 65%, #362418);
+
+    --success: color-mix(in srgb, #93827B 62%, #362418);
+    --success-soft: color-mix(in srgb, #93827B 22%, #FFFBFF);
+    --success-on-soft: #362418;
+
+    --warning: #F1DAC0;
+    --warning-strong: color-mix(in srgb, #F1DAC0 85%, #93827B);
+    --warning-soft: color-mix(in srgb, #F1DAC0 45%, #FFFBFF);
+    --warning-on-soft: #362418;
+
+    --danger: #362418;
+    --danger-strong: color-mix(in srgb, #362418 70%, #000501);
+    --danger-soft: color-mix(in srgb, #362418 10%, #FFFBFF);
+    --danger-on-soft: #362418;
+
+    --info: #93827B;
+    --info-soft: color-mix(in srgb, #93827B 16%, #FFFBFF);
+    --info-on-soft: #362418;
+
+    --priority-alta: #F1DAC0;
+    --priority-alta-ink: #362418;
+    --priority-media: #93827B;
+    --priority-media-ink: #FFFBFF;
+    --priority-baja: color-mix(in srgb, #93827B 55%, #040400);
+    --priority-baja-ink: color-mix(in srgb, #93827B 55%, #FFFBFF);
+
+    --file-image: color-mix(in srgb, #F1DAC0 70%, #F6E5D3);
+    --file-image-ink: #362418;
+    --file-audio: color-mix(in srgb, #93827B 70%, #F1DAC0);
+    --file-audio-ink: #040400;
+    --file-document: color-mix(in srgb, #362418 82%, #93827B);
+    --file-document-ink: #FFFBFF;
+    --file-spreadsheet: color-mix(in srgb, #93827B 46%, #FFFBFF);
+    --file-spreadsheet-ink: #362418;
+
+    --dropzone-bg: color-mix(in srgb, #93827B 8%, #000501);
+    --dropzone-bg-hover: color-mix(in srgb, #93827B 16%, #000501);
+    --dropzone-border: color-mix(in srgb, #93827B 55%, #040400);
+    --dropzone-border-active: #F1DAC0;
+    --dropzone-error-bg: color-mix(in srgb, #362418 35%, #000501);
+
+    --drop-target-bg: color-mix(in srgb, #F1DAC0 9%, #000501);
+    --drop-target-border: #F1DAC0;
+
+    --gradient-main: linear-gradient(135deg, #F6E5D3 0%, #F1DAC0 55%, #93827B 145%);
+    --gradient-ink: linear-gradient(180deg, #040400 0%, #000501 100%);
+    --gradient-warm: linear-gradient(160deg, #FFFBFF 0%, #F6E5D3 60%, #F1DAC0 130%);
+    --gradient-sand-soft: linear-gradient(135deg, #F6E5D3 0%, #F1DAC0 100%);
+    --gradient-brown: linear-gradient(135deg, #362418 0%, color-mix(in srgb, #362418 70%, #000501) 100%);
+
+    --chart-1: #F6E5D3;
+    --chart-2: #F1DAC0;
+    --chart-3: #93827B;
+    --chart-4: #362418;
+    --chart-5: #040400;
+
+    --overlay: rgba(0, 5, 1, 0.7);
+    --overlay-soft: rgba(0, 5, 1, 0.45);
+    --focus-ring: #F1DAC0;
+
+    --radius: 18px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+
+    --shadow: 0 6px 25px rgba(0, 5, 1, 0.18);
+    --shadow-hover: 0 10px 35px rgba(0, 5, 1, 0.28);
+    --shadow-soft: 0 2px 10px rgba(0, 5, 1, 0.12);
+    --shadow-raised: 0 14px 45px rgba(0, 5, 1, 0.35);
+    --shadow-cream: 0 6px 22px rgba(54, 36, 24, 0.16);
+
+    --transition: 200ms ease-out;
+    --transition-slow: 320ms ease-out;
+}

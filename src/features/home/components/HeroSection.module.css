@@ -1,0 +1,239 @@
+.section {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sectionBackground {
+  position: absolute;
+  inset: 0;
+  background-image: var(--gradient-ink);
+}
+
+.sectionInner {
+  position: relative;
+  display: grid;
+  width: 100%;
+  max-width: 1152px;
+  margin: 0 auto;
+  align-items: center;
+  gap: 48px;
+  padding: 64px 16px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--ink-raised);
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cream);
+}
+
+.badgeIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--sand);
+}
+
+.title {
+  margin: 0;
+  font-size: 36px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+}
+
+.titleHighlight {
+  background-image: var(--gradient-main);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.description {
+  margin: 0;
+  max-width: 576px;
+  font-size: 16px;
+  line-height: 1.625;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Mockup del tablero */
+
+.mockup {
+  display: none;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-subtle);
+  background: var(--ink-raised);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.mockupHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.mockupIcon {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background-image: var(--gradient-main);
+  color: var(--brown);
+}
+
+.mockupTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mockupTitleBar {
+  display: block;
+  height: 10px;
+  width: 128px;
+  border-radius: 999px;
+  background: var(--sand);
+}
+
+.mockupSubtitleBar {
+  display: block;
+  height: 8px;
+  width: 80px;
+  border-radius: 999px;
+  background: rgba(147, 130, 123, 0.6);
+}
+
+.mockupColumns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.mockupColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--ink-soft);
+  padding: 12px;
+}
+
+.mockupColumnHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mockupDot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.dotTaupe .mockupDot {
+  background: var(--taupe);
+}
+
+.dotSand .mockupDot {
+  background: var(--sand);
+}
+
+.dotCream .mockupDot {
+  background: var(--cream);
+}
+
+.mockupColumnTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-on-dark);
+}
+
+.mockupCard {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--ink-raised);
+  padding: 10px 12px;
+}
+
+.mockupCardBar {
+  display: block;
+  height: 8px;
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(147, 130, 123, 0.5);
+}
+
+.mockupCardBarShort {
+  display: block;
+  margin-top: 6px;
+  height: 8px;
+  width: 66%;
+  border-radius: 999px;
+  background: rgba(147, 130, 123, 0.3);
+}
+
+@media (min-width: 640px) {
+  .sectionInner {
+    padding: 64px 24px;
+  }
+
+  .title {
+    font-size: 48px;
+  }
+
+  .description {
+    font-size: 18px;
+  }
+
+  .actions {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 768px) {
+  .sectionInner {
+    padding-top: 96px;
+    padding-bottom: 96px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sectionInner {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 64px;
+  }
+
+  .mockup {
+    display: block;
+  }
+}

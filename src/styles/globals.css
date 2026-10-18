@@ -1,0 +1,179 @@
+@import "./tokens.css";
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text-on-dark);
+
+    font-family:
+        "Inter",
+        "Manrope",
+        "Plus Jakarta Sans",
+        system-ui,
+        sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+::selection {
+    background: var(--sand);
+    color: var(--brown);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--ink-soft);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--taupe);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sand);
+}
+
+:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+[data-kanban-draggable] {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* ---- Utilidades base compartidas (sin Tailwind) ---- */
+
+/* Selects nativos de formulario */
+.field-select {
+    height: 44px;
+    width: 100%;
+    padding: 0 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: var(--ink-soft);
+    color: var(--text-on-dark);
+    font-size: 14px;
+    transition: border-color var(--transition);
+    cursor: pointer;
+}
+
+.field-select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.field-select:focus {
+    border-color: var(--sand);
+    outline: 2px solid var(--sand);
+    outline-offset: 1px;
+}
+
+/* Tamaños de iconos (lucide-react) */
+.icon-sm {
+    width: 14px;
+    height: 14px;
+}
+
+.icon-md {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-lg {
+    width: 20px;
+    height: 20px;
+}
+
+.icon-xl {
+    width: 24px;
+    height: 24px;
+}
+
+/* Accesibilidad: texto solo visible para lectores de pantalla */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Pantalla completa de carga (guardas de ruta) */
+.fullscreen-loader {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: var(--ink);
+}
+
+.fullscreen-loader-spinner {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 2px solid var(--border-subtle);
+    border-top-color: var(--sand);
+    animation: fullscreen-loader-spin 0.9s linear infinite;
+}
+
+.fullscreen-loader-message {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+@keyframes fullscreen-loader-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

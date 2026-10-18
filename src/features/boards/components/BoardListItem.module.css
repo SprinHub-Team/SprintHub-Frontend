@@ -1,0 +1,86 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition);
+}
+
+.itemSelected {
+  background: var(--ink-raised);
+}
+
+.itemIdle:hover {
+  background: color-mix(in srgb, var(--ink-raised) 60%, transparent);
+}
+
+.selectButton {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  padding: 8px 10px;
+  background: none;
+  text-align: left;
+}
+
+.boardIcon {
+  flex-shrink: 0;
+}
+
+.iconSelected {
+  color: var(--sand);
+}
+
+.iconIdle {
+  color: var(--taupe);
+}
+
+.boardTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.titleSelected {
+  font-weight: 500;
+  color: var(--cream);
+}
+
+.titleIdle {
+  color: var(--text-on-dark);
+}
+
+.deleteButton {
+  margin-right: 4px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  background: none;
+  color: var(--taupe);
+  opacity: 0;
+  transition: opacity var(--transition), color var(--transition);
+}
+
+.item:hover .deleteButton,
+.deleteButton:focus-visible {
+  opacity: 1;
+}
+
+.deleteButton:hover:not(:disabled) {
+  color: var(--cream);
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deleteIcon {
+  width: 14px;
+  height: 14px;
+}

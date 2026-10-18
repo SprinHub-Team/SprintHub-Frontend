@@ -1,0 +1,24 @@
+.currentImage {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--ink-soft);
+  padding: 12px;
+}
+
+.currentImageThumb {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-subtle);
+  object-fit: cover;
+}
+
+.currentImageText {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}

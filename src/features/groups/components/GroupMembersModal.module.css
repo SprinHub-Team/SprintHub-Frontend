@@ -1,0 +1,199 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Formulario de invitación */
+
+.inviteForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inviteFields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inviteEmail {
+  flex: 1;
+}
+
+.inviteRole {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roleLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-on-dark);
+}
+
+.inviteSubmit {
+  align-self: flex-start;
+}
+
+/* Lista de miembros */
+
+.membersSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.membersTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-on-dark);
+}
+
+.membersTitleIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--sand);
+}
+
+.memberList {
+  display: flex;
+  max-height: 256px;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0 4px 0 0;
+  list-style: none;
+}
+
+.memberRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--ink-soft);
+  padding: 12px 16px;
+}
+
+.memberInfo {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.memberName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-on-dark);
+}
+
+.memberSelf {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--sand);
+}
+
+.memberEmail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.memberActions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.roleControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.roleLock {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.roleLockIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--taupe);
+}
+
+.roleSelect {
+  height: 32px;
+  width: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--ink-raised);
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--text-on-dark);
+  transition: border-color var(--transition);
+  cursor: pointer;
+}
+
+.roleSelect:hover:not(:disabled) {
+  border-color: var(--border-dark);
+}
+
+.roleSelect:focus {
+  border-color: var(--sand);
+  outline: 2px solid var(--sand);
+  outline-offset: 1px;
+}
+
+.roleSelect:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.removeButton {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  background: none;
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.removeButton:hover:not(:disabled) {
+  color: var(--cream);
+}
+
+.removeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (min-width: 640px) {
+  .inviteFields {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .inviteRole {
+    width: 176px;
+  }
+}

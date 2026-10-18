@@ -1,0 +1,11 @@
+.draggable {
+  transition: opacity var(--transition);
+}
+
+.dragging {
+  opacity: 0.4;
+}
+
+.disabled {
+  cursor: default;
+}

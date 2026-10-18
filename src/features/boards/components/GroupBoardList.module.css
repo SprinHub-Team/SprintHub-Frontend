@@ -1,0 +1,42 @@
+.stateWrapper {
+  padding: 8px 0 8px 4px;
+}
+
+.stateCard {
+  border-color: transparent;
+  background: transparent;
+  padding: 16px 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.empty {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.createButton {
+  display: flex;
+  height: 36px;
+  margin-top: 4px;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  background: none;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.createButton:hover {
+  background: color-mix(in srgb, var(--ink-raised) 60%, transparent);
+  color: var(--cream);
+}
