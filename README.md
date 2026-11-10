@@ -4,7 +4,7 @@ Frontend de **SprintHub** — plataforma de gestión de proyectos tipo Trello/Ji
 
 <div align="center">
 <h3><font color="white">Deploy Page</font></h3>
-<a href="https://netlify.app" target="_blank">
+<a href="https://sprinthubs.netlify.app" target="_blank">
   <img src="https://github.com/user-attachments/assets/696c2ccd-e38a-4ef6-9396-d4fc50894a22" width="100" height="100" alt="SprintHub Deploy" />
 </a>
 </div>
