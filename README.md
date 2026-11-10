@@ -2,9 +2,13 @@
 
 Frontend de **SprintHub** — plataforma de gestión de proyectos tipo Trello/Jira con boards, columnas, tarjetas arrastrables (@dnd-kit) y comentarios en tiempo real (Socket.io).
 
-<a href="https://sprinthubs.netlify.app" target="_blank">
-  <img src="https://github.com/user-attachments/assets/696c2ccd-e38a-4ef6-9396-d4fc50894a22" width="40" height="40" alt="SprintHub Deploy" />
-</a>
+<div align="center">
+  <a href="https://sprinthubs.netlify.app" target="_blank" style="text-decoration: none; color: inherit;">
+    <img src="https://github.com/user-attachments/assets/696c2ccd-e38a-4ef6-9396-d4fc50894a22" width="60" height="60" alt="SprintHub Deploy" style="vertical-align: middle;" />
+    <br />
+    <span style="font-weight: bold; font-size: 16px;">Deploy Page</span>
+  </a>
+</div>
 
 > Repositorio: https://github.com/SprinHub-Team/SprintHub-Frontend
 > Equipo: SprinHub-Team
