@@ -1,9 +1,8 @@
-name: Actualizar Estado de Despliegue
+name: Actualizar Estado de Despliegue Real
 
 on:
-  push:
-    branches:
-      - main
+  repository_dispatch:
+    types: [netlify_deploy_success]
 
 permissions:
   deployments: write
@@ -26,6 +25,6 @@ jobs:
         if: always()
         with:
           step: finish
-          status: ${{ job.status }}
+          status: success
           env: ${{ steps.deployment.outputs.env }}
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
