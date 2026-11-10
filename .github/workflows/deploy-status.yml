@@ -1,0 +1,31 @@
+name: Actualizar Estado de Despliegue
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  deployments: write
+  contents: read
+
+jobs:
+  update-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Iniciar Despliegue en GitHub
+        uses: bobheadxi/deployments@v1
+        id: deployment
+        with:
+          step: start
+          env: Production
+          ref: ${{ github.sha }}
+
+      - name: Marcar como Exitoso
+        uses: bobheadxi/deployments@v1
+        if: always()
+        with:
+          step: finish
+          status: ${{ job.status }}
+          env: ${{ steps.deployment.outputs.env }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
