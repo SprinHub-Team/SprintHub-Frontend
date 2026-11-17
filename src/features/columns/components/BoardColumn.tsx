@@ -87,6 +87,7 @@ export function BoardColumn({
 
   return (
     <section
+      ref={setNodeRef}
       aria-label={`Columna ${column.name}`}
       className={cn(
         'flex h-fit max-h-full w-72 shrink-0 flex-col rounded-(--radius) border bg-(--ink-raised)',
@@ -161,7 +162,6 @@ export function BoardColumn({
       </header>
 
       <div
-        ref={setNodeRef}
         className="flex max-h-[calc(100vh-19rem)] min-h-16 flex-col gap-2.5 overflow-y-auto p-3"
         aria-label={`Zona de destino de ${column.name}`}
       >

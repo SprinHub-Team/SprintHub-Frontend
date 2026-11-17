@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
 interface DashboardState {
+  view: 'board' | 'backlog' | 'statistics';
+  selectView: (groupId: string, view: 'backlog' | 'statistics') => void;
   selectedGroupId: string | null;
   selectedBoardId: string | null;
   expandedGroupIds: string[];
@@ -19,12 +21,14 @@ interface DashboardState {
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
+  view: 'board',
   selectedGroupId: null,
   selectedBoardId: null,
   expandedGroupIds: [],
   mobileSidebarOpen: false,
   createGroupModalOpen: false,
 
+  selectView: (groupId, view) => set({ selectedGroupId: groupId, selectedBoardId: null, view, mobileSidebarOpen: false }),
   selectGroup: (groupId) =>
     set((state) => ({
       selectedGroupId: groupId,
@@ -37,6 +41,7 @@ export const useDashboardStore = create<DashboardState>((set) => ({
     set((state) => ({
       selectedGroupId: groupId,
       selectedBoardId: boardId,
+      view: 'board',
       expandedGroupIds: state.expandedGroupIds.includes(groupId)
         ? state.expandedGroupIds
         : [...state.expandedGroupIds, groupId],

@@ -1,3 +1,4 @@
+import { ListTodo, BarChart3 } from 'lucide-react';
 import { useState } from 'react';
 import { KanbanSquare, LogOut, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button/Button';
@@ -16,6 +17,8 @@ import { cn } from '@/lib/utils';
 import { useDashboardStore } from '../store/useDashboardStore';
 
 export function DashboardSidebar() {
+  const view = useDashboardStore(state => state.view);
+  const selectView = useDashboardStore(state => state.selectView);
   const session = useAuthStore((state) => state.session);
   const logout = useAuthStore((state) => state.logout);
   const groups = useGroupsStore((state) => state.groups);
@@ -148,6 +151,14 @@ export function DashboardSidebar() {
                 onDeleteGroup={() => handleDeleteGroup(group.id)}
                 deletingGroup={deleteGroupMutation.loading}
               >
+                <div className="mb-2 grid gap-1 pl-3">
+                  {[{ id: 'backlog' as const, label: 'Product backlog', Icon: ListTodo }, { id: 'statistics' as const, label: 'Reportes', Icon: BarChart3 }].map(item => (
+                    <button key={item.id} onClick={() => selectView(group.id, item.id)} aria-current={selectedGroupId === group.id && view === item.id ? 'page' : undefined}
+                      className={cn('flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors', selectedGroupId === group.id && view === item.id ? 'bg-(--cream) text-(--brown)' : 'text-(--text-muted) hover:bg-(--ink-hover) hover:text-(--cream)')}>
+                      <item.Icon className="size-4" />{item.label}
+                    </button>
+                  ))}
+                </div>
                 <GroupBoardList
                   groupId={group.id}
                   selectedBoardId={selectedGroupId === group.id ? selectedBoardId : null}

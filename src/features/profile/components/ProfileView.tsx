@@ -65,11 +65,15 @@ export function ProfileView() {
       setFieldErrors(zodFieldErrors(parsed.error.issues));
       return;
     }
+    if (profile?.document && !parsed.data.document) {
+      setFieldErrors({ document: 'Ingresa tu documento de identidad' });
+      return;
+    }
     setFieldErrors({});
     const succeeded = await update({
       name: parsed.data.name,
       email: parsed.data.email,
-      document: parsed.data.document,
+      document: parsed.data.document || undefined,
       password: parsed.data.password.length > 0 ? parsed.data.password : undefined,
       file: avatar,
     });
@@ -100,7 +104,7 @@ export function ProfileView() {
           </p>
           <p className="flex items-center justify-center gap-1.5 text-sm text-(--text-muted) sm:justify-start">
             <IdCard aria-hidden="true" className="size-3.5 shrink-0" />
-            <span className="truncate">{profile.document}</span>
+            <span className="truncate">{profile.document || 'Sin documento registrado'}</span>
           </p>
         </div>
       </header>
@@ -148,7 +152,7 @@ export function ProfileView() {
             type="text"
             name="profile-document"
             autoComplete="off"
-            required
+            required={Boolean(profile.document)}
             value={values.document}
             onChange={handleChange('document')}
             error={fieldErrors.document}

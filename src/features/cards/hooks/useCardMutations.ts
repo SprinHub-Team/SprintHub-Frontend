@@ -29,6 +29,7 @@ export function useCardMutations() {
         const card = await createCard({
           title: data.title,
           description: data.description ?? '',
+          dueDate: data.dueDate ? new Date(data.dueDate + 'T23:59:59').toISOString() : null,
           columnId,
           assignedTo: data.assignedTo && data.assignedTo.length > 0 ? data.assignedTo : undefined,
           priority: data.priority,
@@ -58,6 +59,7 @@ export function useCardMutations() {
         const card = await updateCard({
           cardId,
           title: data.title,
+          dueDate: data.dueDate, status: data.status,
           description: data.description,
           columnId: targetColumnId || currentColumnId,
           assignedTo:
@@ -65,7 +67,7 @@ export function useCardMutations() {
               ? undefined
               : data.assignedTo.length > 0
                 ? data.assignedTo
-                : undefined,
+                : null,
           priority: data.priority,
         });
         useActiveBoardStore.getState().changeCard(card);
@@ -149,6 +151,7 @@ export function useCardMutations() {
       if (!card || card.columnId === targetColumnId) return true;
 
       setMovingCardId(cardId);
+      useActiveBoardStore.getState().changeCard({ ...card, columnId: targetColumnId });
       try {
         const updated = await updateCard({
           cardId,
@@ -160,6 +163,11 @@ export function useCardMutations() {
         }`);
         return true;
       } catch (caught: unknown) {
+        const current = useActiveBoardStore.getState().board;
+        const latest = current?.columns.flatMap(c => c.cards).find(c => c.id === cardId);
+        if (current?.id === board.id && latest?.columnId === targetColumnId) {
+          useActiveBoardStore.getState().changeCard({ ...latest, columnId: card.columnId });
+        }
         toast.error(errorHandler(caught).message, 'No se pudo mover la tarjeta');
         return false;
       } finally {

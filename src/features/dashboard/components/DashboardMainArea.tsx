@@ -1,3 +1,7 @@
+import { lazy, Suspense } from 'react';
+import { LoadingState } from '@/components/ui/LoadingState/LoadingState';
+const BacklogWorkspace = lazy(() => import('@/features/backlog/components/BacklogWorkspace').then(m => ({ default: m.BacklogWorkspace })));
+const StatisticsWorkspace = lazy(() => import('@/features/statistics/components/StatisticsWorkspace').then(m => ({ default: m.StatisticsWorkspace })));
 import { KanbanSquare, LayoutGrid, Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button/Button';
 import { EmptyState } from '@/components/ui/EmptyState/EmptyState';
@@ -19,6 +23,7 @@ export function DashboardMainArea({
   selectedBoardId,
   onCreateGroup,
 }: DashboardMainAreaProps) {
+  const view = useDashboardStore(state => state.view);
   const setMobileSidebarOpen = useDashboardStore((state) => state.setMobileSidebarOpen);
   const sessionUserId = useAuthStore((state) => state.session?.user.id ?? null);
   const selectedGroup = groups.find((group) => group.id === selectedGroupId) ?? null;
@@ -45,6 +50,11 @@ export function DashboardMainArea({
     );
   }
 
+  if (selectedGroup && view !== 'board') {
+    return <div className="h-full overflow-y-auto p-4 sm:p-6 lg:p-8"><Suspense fallback={<LoadingState message="Cargando espacio…" />}>{view === 'backlog'
+      ? <BacklogWorkspace key={selectedGroup.id} group={selectedGroup} isAdmin={isAdminOfSelectedGroup} />
+      : <StatisticsWorkspace key={selectedGroup.id} group={selectedGroup} />}</Suspense></div>;
+  }
   if (!selectedBoardId) {
     return (
       <div className="flex h-full items-center justify-center p-6">

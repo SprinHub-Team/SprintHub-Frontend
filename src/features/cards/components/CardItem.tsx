@@ -1,5 +1,7 @@
+import { ChecklistProgress } from './ChecklistProgress';
 import { ArrowDown, ArrowUp, Minus, MessageSquare, Paperclip, UserRound } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge/Badge';
+import { cn } from '@/lib/utils';
 import { UserAvatar } from './UserAvatar';
 import type { Card, CardPriority } from '../types/card.types';
 
@@ -12,9 +14,10 @@ const PRIORITY_META: Record<CardPriority, { label: string; icon: typeof ArrowUp 
 export interface CardItemProps {
   card: Card;
   onOpen: (cardId: string) => void;
+  className?: string;
 }
 
-export function CardItem({ card, onOpen }: CardItemProps) {
+export function CardItem({ card, onOpen, className }: CardItemProps) {
   const priority = PRIORITY_META[card.priority];
   const PriorityIcon = priority.icon;
 
@@ -22,7 +25,7 @@ export function CardItem({ card, onOpen }: CardItemProps) {
     <button
       type="button"
       onClick={() => onOpen(card.id)}
-      className="flex w-full flex-col gap-3 rounded-(--radius-sm) border border-(--border-subtle) bg-(--ink-raised) p-3.5 text-left shadow-(--shadow-soft) transition-[border-color,box-shadow] duration-200 ease-out hover:border-(--border-dark) hover:shadow-(--shadow)"
+      className={cn('flex w-full flex-col gap-3 rounded-(--radius-sm) border border-(--border-subtle) bg-(--ink-raised) p-3.5 text-left shadow-(--shadow-soft) transition-[border-color,box-shadow] duration-200 ease-out hover:border-(--border-dark) hover:shadow-(--shadow)', className)}
     >
       <div className="flex items-start justify-between gap-2">
         <span className="text-sm font-medium leading-snug text-(--text-on-dark)">
@@ -42,6 +45,11 @@ export function CardItem({ card, onOpen }: CardItemProps) {
         </p>
       ) : null}
 
+      {card.subtasks.length > 0 && <ChecklistProgress subtasks={card.subtasks} />}
+      <div className="flex flex-wrap gap-2 text-xs text-(--sand)">
+        <span>{card.status === 'completada' ? '✓ Completada' : card.status === 'en_progreso' ? '◉ En progreso' : '○ Pendiente'}</span>
+        {card.dueDate && <span>{card.status !== 'completada' && new Date(card.dueDate) < new Date() ? '· Vencida' : '· Vence'} {new Date(card.dueDate).toLocaleDateString()}</span>}
+      </div>
       <div className="flex items-center justify-between gap-2 text-xs text-(--text-muted)">
         <span className="flex items-center gap-1.5">
           <span className="flex items-center gap-1">

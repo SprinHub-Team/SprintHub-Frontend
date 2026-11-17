@@ -6,6 +6,7 @@ export type GroupMemberDto = {
   id: string;
   name: string;
   email: string;
+  profilePicture: string;
   role: GroupMemberRole;
 };
 

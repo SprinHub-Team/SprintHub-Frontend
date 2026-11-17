@@ -4,7 +4,7 @@ export const userProfileDtoSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.email(),
-  document: z.string(),
+  document: z.string().nullish().transform(value => value ?? ''),
   profilePicture: z.string(),
 });
 

@@ -8,6 +8,9 @@ export const cardDtoSchema = z.object({
   description: z.string(),
   columnId: z.string(),
   dueDate: z.string().nullable(),
+  status: z.enum(['pendiente', 'en_progreso', 'completada']).default('pendiente'),
+  completedAt: z.string().nullable().default(null),
+  subtasks: z.array(z.object({ id: z.string(), title: z.string(), completed: z.boolean() })).default([]),
   priority: z.enum(['alta', 'media', 'baja']),
   files: z.array(
     z.object({

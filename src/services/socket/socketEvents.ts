@@ -56,19 +56,23 @@ export type UpdateColumnPayload = {
 export type DeleteColumnPayload = string;
 
 export type CreateCardPayload = {
+  dueDate?: string | null;
   title: string;
   description?: string;
   columnId: string;
-  assignedTo?: string;
+  assignedTo?: string | null;
   priority?: CardPriority;
 };
 
 export type UpdateCardPayload = {
+  status?: 'pendiente' | 'en_progreso' | 'completada';
+  dueDate?: string | null;
+  subtask?: { action: 'add'; id: string; title: string } | { action: 'toggle'; id: string; completed: boolean } | { action: 'delete'; id: string };
   cardId: string;
   title?: string;
   description?: string;
   columnId: string;
-  assignedTo?: string;
+  assignedTo?: string | null;
   priority?: CardPriority;
 };
 

@@ -1,3 +1,5 @@
+import { AssigneeSelect, PrioritySelect } from './CardFieldSelects';
+import { CardChecklist } from './CardChecklist';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert/Alert';
@@ -32,6 +34,8 @@ interface EditValues {
   priority: CardPriority;
   assignedTo: string;
   columnId: string;
+  dueDate: string;
+  status: 'pendiente' | 'en_progreso' | 'completada';
 }
 
 export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteCard = false }: CardDetailsModalProps) {
@@ -60,6 +64,8 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
     if (!card) return;
     setValues({
       title: card.title,
+      dueDate: card.dueDate ? new Date(card.dueDate).toLocaleDateString("en-CA") : "",
+      status: card.status,
       description: card.description,
       priority: card.priority,
       assignedTo: card.assignedTo?.id ?? '',
@@ -84,6 +90,8 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
       values.columnId,
       {
         title: values.title.trim(),
+        dueDate: values.dueDate ? new Date(values.dueDate + "T23:59:59").toISOString() : null,
+        status: values.status,
         description: values.description,
         priority: values.priority,
         assignedTo: values.assignedTo,
@@ -100,7 +108,7 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
     void remove(card.id);
   };
 
-  const canUnassign = (card?.assignedTo ?? null) === null;
+
 
   return (
     <Modal
@@ -109,7 +117,7 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
       title={card ? card.title : 'Tarjeta'}
       description={
         card
-          ? `En ${columns.find((column) => column.id === card.columnId)?.name ?? 'el tablero'}`
+          ? `Columna: ${columns.find((column) => column.id === card.columnId)?.name ?? 'Sin columna'}`
           : undefined
       }
     >
@@ -126,6 +134,14 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
                 disabled={loading}
               />
 
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input label="Fecha de vencimiento" type="date" name="dueDate" value={values.dueDate} onChange={handleChange('dueDate')} disabled={loading} />
+                <label className="flex flex-col gap-2 text-sm">Estado
+                  <select className="workspace-select" value={values.status} onChange={handleChange('status')} disabled={loading}>
+                    <option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completada">Completada</option>
+                  </select>
+                </label>
+              </div>
               <TextArea
                 label="Descripción"
                 name="edit-description"
@@ -134,50 +150,13 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
                 disabled={loading}
               />
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="edit-priority" className="text-sm font-medium text-(--text-on-dark)">
-                    Prioridad
-                  </label>
-                  <select
-                    id="edit-priority"
-                    value={values.priority}
-                    onChange={handleChange('priority')}
-                    disabled={loading}
-                    className="h-11 w-full rounded-(--radius-sm) border border-(--border-subtle) bg-(--ink-soft) px-3 text-sm text-(--text-on-dark) focus:border-(--sand) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--sand)"
-                  >
-                    <option value="alta">Alta</option>
-                    <option value="media">Media</option>
-                    <option value="baja">Baja</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="edit-assigned" className="text-sm font-medium text-(--text-on-dark)">
-                    Responsable
-                  </label>
-                  <select
-                    id="edit-assigned"
-                    value={values.assignedTo}
-                    onChange={handleChange('assignedTo')}
-                    disabled={loading}
-                    className="h-11 w-full rounded-(--radius-sm) border border-(--border-subtle) bg-(--ink-soft) px-3 text-sm text-(--text-on-dark) focus:border-(--sand) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--sand)"
-                  >
-                    {canUnassign ? <option value="">Sin asignar</option> : null}
-                    {members.map((member) => (
-                      <option key={member.id} value={member.id}>
-                        {member.name}
-                      </option>
-                    ))}
-                  </select>
-                  {!canUnassign ? (
-                    <p className="text-xs text-(--text-muted)">
-                      El contrato actual no permite desasignar: elige otro responsable.
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="flex flex-col gap-2">
+              <div className="grid items-start gap-4 sm:grid-cols-2">
+                <PrioritySelect value={values.priority} disabled={loading}
+                  onChange={priority => setValues({ ...values, priority })} />
+                <AssigneeSelect members={card.assignedTo && !members.some(member => member.id === card.assignedTo?.id)
+                  ? [...members, card.assignedTo] : members} value={values.assignedTo} disabled={loading}
+                  onChange={assignedTo => setValues({ ...values, assignedTo })} />
+                <div className="flex flex-col gap-2 sm:col-span-2">
                   <label htmlFor="edit-column" className="text-sm font-medium text-(--text-on-dark)">
                     Columna
                   </label>
@@ -217,6 +196,8 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
           ) : (
             <section className="flex flex-col gap-4" aria-label="Detalles de la tarjeta">
               <div className="flex flex-wrap items-center gap-2">
+                <Badge tone="outline">{card.status === "completada" ? "Completada" : card.status === "en_progreso" ? "En progreso" : "Pendiente"}</Badge>
+                {card.dueDate && <Badge tone="muted">Vence: {new Date(card.dueDate).toLocaleDateString()}</Badge>}
                 <Badge tone={card.priority === 'alta' ? 'outline' : 'neutral'}>
                   Prioridad {card.priority}
                 </Badge>
@@ -246,7 +227,10 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
                 <p className="text-sm text-(--text-muted)">Esta tarjeta no tiene descripción.</p>
               )}
 
-              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
+                <Button size="sm" loading={loading} onClick={() => void update(card.id, card.columnId, card.columnId, { status: card.status === 'completada' ? 'pendiente' : 'completada' })}>
+                  {card.status === 'completada' ? 'Reabrir tarea' : 'Marcar como completada'}
+                </Button>
                 {canDeleteCard ? (
                   <Button
                     variant="danger"
@@ -269,6 +253,8 @@ export function CardDetailsModal({ cardId, columns, members, onClose, canDeleteC
               </div>
             </section>
           )}
+
+          <CardChecklist key={card.id} card={card} />
 
           <section className="flex flex-col gap-4 border-t border-(--border-subtle) pt-6" aria-label="Comentarios">
             <h3 className="text-sm font-semibold text-(--text-on-dark)">

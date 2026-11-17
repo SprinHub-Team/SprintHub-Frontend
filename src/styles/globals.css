@@ -81,3 +81,22 @@ button {
         transition-duration: 0.01ms !important;
     }
 }
+
+.workspace-panel { border: 1px solid var(--border-subtle); border-radius: var(--radius); background: var(--ink-raised); }
+.workspace-eyebrow { color: var(--text-muted); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .13em; }
+.workspace-select { min-height: 38px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; background: var(--ink-soft); color: var(--text-on-dark); font-size: 13px; }
+.workspace-select:focus { border-color: var(--sand); }
+.workspace-select:disabled { opacity: .5; }
+.workspace-label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.backlog-row { display: flex; align-items: center; gap: 12px; padding: 12px 8px; border: 1px solid transparent; border-bottom-color: var(--border-subtle-soft); border-radius: 8px; transition: background 180ms, border-color 180ms; }
+.backlog-row:hover, .backlog-row.is-selected { background: var(--ink-hover); }
+.backlog-row.is-selected { border-color: var(--taupe); }
+.podium-panel { background: radial-gradient(ellipse at top, color-mix(in srgb, var(--sand) 7%, transparent), transparent 65%), var(--ink-raised); }
+.podium-step { background: linear-gradient(180deg, color-mix(in srgb, var(--taupe) 24%, transparent), transparent); }
+.podium-step-0 { background: linear-gradient(180deg, color-mix(in srgb, var(--sand) 24%, transparent), color-mix(in srgb, var(--sand) 5%, transparent)); border-color: var(--taupe); }
+.workspace-enter { animation: workspace-enter 320ms ease-out; }
+.card-arrival { animation: card-arrival 300ms cubic-bezier(.22,1,.36,1); }
+.drag-lift { box-shadow: 0 24px 60px #0009, 0 0 0 1px var(--sand); border-radius: var(--radius-sm); cursor: grabbing; }
+@keyframes workspace-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes card-arrival { from { opacity: .4; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 640px) { .backlog-row { gap: 6px; flex-wrap: wrap; } .backlog-row > button:nth-of-type(2) { min-width: 50%; } }

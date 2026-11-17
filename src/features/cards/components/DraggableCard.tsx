@@ -1,3 +1,4 @@
+import { GripVertical } from 'lucide-react';
 import { useDraggable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
 import { CardItem } from './CardItem';
@@ -33,26 +34,31 @@ export function parseKanbanColumnDropId(id: string): string | null {
 }
 
 export function DraggableCard({ card, onOpen, disabled = false }: DraggableCardProps) {
-  const { listeners, setNodeRef, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({
     id: kanbanCardDragId(card.id),
     data: { cardId: card.id, columnId: card.columnId },
     disabled,
   });
+  const { onPointerDown, ...keyboardListeners } = listeners ?? {};
 
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
+      onPointerDown={event => onPointerDown?.(event)}
       data-kanban-draggable
-      aria-hidden={false}
       title="Arrastra para mover de columna, o haz clic para abrir el detalle"
       className={cn(
-        'transition-opacity duration-200 ease-out',
+        'group relative card-arrival transition-opacity duration-200 ease-out',
         isDragging && 'opacity-40',
         disabled && 'cursor-default',
       )}
     >
-      <CardItem card={card} onOpen={onOpen} />
+      <button ref={setActivatorNodeRef} {...attributes} {...keyboardListeners} disabled={disabled}
+        type="button" aria-label={`Mover tarjeta ${card.title}`}
+        className="absolute top-2.5 left-1 z-10 cursor-grab rounded p-1 text-(--taupe) hover:bg-(--ink-hover) hover:text-(--cream) active:cursor-grabbing">
+        <GripVertical className="size-4" />
+      </button>
+      <CardItem card={card} onOpen={onOpen} className="cursor-grab pl-8 active:cursor-grabbing" />
     </div>
   );
 }

@@ -15,6 +15,9 @@ export type CardDto = {
   description: string;
   columnId: string;
   dueDate: string | null;
+  status: 'pendiente' | 'en_progreso' | 'completada';
+  completedAt: string | null;
+  subtasks: { id: string; title: string; completed: boolean }[];
   priority: CardPriority;
   files: CardFileDto[];
   assignedTo: UserReference | null;

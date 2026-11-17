@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const createCardSchema = z.object({
+  dueDate: z.string().optional(),
   title: z.string().min(2, { error: 'El título debe tener al menos 2 caracteres' }),
   description: z
     .string()
@@ -13,6 +14,8 @@ export const createCardSchema = z.object({
 export type CreateCardFormData = z.infer<typeof createCardSchema>;
 
 export const updateCardSchema = z.object({
+  dueDate: z.string().nullable().optional(),
+  status: z.enum(['pendiente', 'en_progreso', 'completada']).optional(),
   title: z.string().min(2, { error: 'El título debe tener al menos 2 caracteres' }).optional(),
   description: z.string().optional(),
   assignedTo: z.string().optional(),

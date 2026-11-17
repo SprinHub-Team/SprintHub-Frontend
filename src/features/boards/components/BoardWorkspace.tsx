@@ -1,12 +1,18 @@
 import { useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  pointerWithin,
   useSensor,
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
+  type CollisionDetection,
+  type KeyboardCoordinateGetter,
 } from '@dnd-kit/core';
 import { Radio } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge/Badge';
@@ -25,6 +31,28 @@ import type { GroupMemberDto } from '@/features/groups/types/group.dto';
 import { useActiveBoard, useRealtimeStatus } from '../hooks/useActiveBoard';
 import type { Card } from '@/features/cards/types/card.types';
 
+const detectColumn: CollisionDetection = args =>
+  args.pointerCoordinates ? pointerWithin(args) : closestCenter(args);
+
+const moveAcrossColumns: KeyboardCoordinateGetter = (event, { context, currentCoordinates }) => {
+  if (event.code !== 'ArrowLeft' && event.code !== 'ArrowRight') return;
+  const columns = context.droppableContainers.getEnabled().flatMap(column => {
+    const rect = context.droppableRects.get(column.id);
+    return rect ? [{ id: column.id, rect }] : [];
+  }).sort((a, b) => a.rect.left - b.rect.left);
+  const origin = context.over?.id ?? `kanban-column:${context.active?.data.current?.columnId}`;
+  const index = columns.findIndex(column => column.id === origin);
+  const target = index >= 0 ? columns[index + (event.code === 'ArrowRight' ? 1 : -1)] : undefined;
+  if (!target || !context.collisionRect) return;
+  event.preventDefault();
+  const { left, width, top, height } = target.rect;
+  const card = context.collisionRect;
+  return {
+    x: currentCoordinates.x + left + width / 2 - (card.left + card.width / 2),
+    y: currentCoordinates.y + top + height / 2 - (card.top + card.height / 2),
+  };
+};
+
 export interface BoardWorkspaceProps {
   boardId: string;
   members: GroupMemberDto[];
@@ -41,7 +69,8 @@ export function BoardWorkspace({ boardId, members, canManageCards = false }: Boa
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: { distance: 6 },
   });
-  const sensors = useSensors(pointerSensor);
+  const keyboardSensor = useSensor(KeyboardSensor, { coordinateGetter: moveAcrossColumns });
+  const sensors = useSensors(pointerSensor, keyboardSensor);
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
@@ -105,11 +134,17 @@ export function BoardWorkspace({ boardId, members, canManageCards = false }: Boa
 
       <DndContext
         sensors={sensors}
+        collisionDetection={detectColumn}
+        autoScroll={{
+          canScroll: element => element.hasAttribute('data-board-scroll'),
+          threshold: { x: 0.08, y: 0 },
+          acceleration: 6,
+        }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragCancel={() => setDraggingCard(null)}
       >
-        <div className="flex min-h-0 flex-1 gap-4 overflow-x-auto pb-4">
+        <div data-board-scroll className="flex min-h-0 flex-1 gap-4 overflow-x-auto pb-4">
           {board.columns.map((column) => (
             <BoardColumn
               key={column.id}
@@ -123,16 +158,17 @@ export function BoardWorkspace({ boardId, members, canManageCards = false }: Boa
           <CreateColumnForm boardId={board.id} />
         </div>
 
-        <DragOverlay dropAnimation={{ duration: 220, easing: 'cubic-bezier(0.2, 0, 0, 1)' }}>
+        {createPortal(<DragOverlay dropAnimation={{ duration: 320, easing: 'cubic-bezier(0.2, 0, 0, 1)' }}>
           {draggingCard ? (
-            <div className="w-72 rotate-2 scale-[1.02]">
+            <div className="drag-lift w-72 rotate-2 scale-[1.04]">
               <CardItem card={draggingCard} onOpen={() => undefined} />
             </div>
           ) : null}
-        </DragOverlay>
+        </DragOverlay>, document.body)}
       </DndContext>
 
       <CardDetailsModal
+        key={openCardId}
         cardId={openCardId}
         columns={board.columns}
         members={members}

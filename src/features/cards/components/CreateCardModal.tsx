@@ -1,3 +1,4 @@
+import { AssigneeSelect, PrioritySelect } from './CardFieldSelects';
 import { useState, type FormEvent } from 'react';
 import { SquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button/Button';
@@ -73,6 +74,7 @@ export function CreateCardModal({
           disabled={loading}
         />
 
+        <Input label="Fecha de vencimiento" name="card-due-date" type="date" value={values.dueDate ?? ''} onChange={handleChange('dueDate')} disabled={loading} />
         <TextArea
           label="Descripción"
           name="card-description"
@@ -84,44 +86,9 @@ export function CreateCardModal({
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="card-priority" className="text-sm font-medium text-(--text-on-dark)">
-              Prioridad
-            </label>
-            <select
-              id="card-priority"
-              name="priority"
-              value={values.priority}
-              onChange={handleChange('priority')}
-              disabled={loading}
-              className="h-11 w-full rounded-(--radius-sm) border border-(--border-subtle) bg-(--ink-soft) px-3 text-sm text-(--text-on-dark) transition-colors duration-200 ease-out hover:border-(--border-dark) focus:border-(--sand) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--sand)"
-            >
-              <option value="alta">Alta</option>
-              <option value="media">Media</option>
-              <option value="baja">Baja</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="card-assigned" className="text-sm font-medium text-(--text-on-dark)">
-              Responsable
-            </label>
-            <select
-              id="card-assigned"
-              name="assignedTo"
-              value={values.assignedTo ?? ''}
-              onChange={handleChange('assignedTo')}
-              disabled={loading}
-              className="h-11 w-full rounded-(--radius-sm) border border-(--border-subtle) bg-(--ink-soft) px-3 text-sm text-(--text-on-dark) transition-colors duration-200 ease-out hover:border-(--border-dark) focus:border-(--sand) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--sand)"
-            >
-              <option value="">Sin asignar</option>
-              {members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <PrioritySelect value={values.priority} disabled={loading} onChange={priority => setValues(current => ({ ...current, priority }))} />
+          <AssigneeSelect members={members} value={values.assignedTo ?? ''} disabled={loading}
+            onChange={assignedTo => setValues(current => ({ ...current, assignedTo }))} />
         </div>
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

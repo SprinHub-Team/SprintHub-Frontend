@@ -13,6 +13,7 @@ export const groupDetailsDtoSchema = groupDtoSchema.extend({
       id: z.string(),
       name: z.string(),
       email: z.string(),
+      profilePicture: z.string().default(''),
       role: z.enum(['admin', 'collaborator']),
     }),
   ),
